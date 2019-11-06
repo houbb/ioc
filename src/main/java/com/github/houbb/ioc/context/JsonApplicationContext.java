@@ -37,6 +37,8 @@ public class JsonApplicationContext extends DefaultBeanFactory {
      * <pre>
      *  new TypeReference<List<BeanDefinition>>(){}
      * </pre>
+     *
+     * 读取文件：https://blog.csdn.net/feeltouch/article/details/83796764
      * @since 0.0.1
      */
     private void init() {
