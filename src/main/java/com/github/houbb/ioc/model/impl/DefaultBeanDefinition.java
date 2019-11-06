@@ -3,7 +3,7 @@ package com.github.houbb.ioc.model.impl;
 import com.github.houbb.ioc.model.BeanDefinition;
 
 /**
- * 对象定义属性
+ * 默认对象定义属性
  * @author binbin.hou
  * @since 0.0.1
  */
@@ -21,33 +21,20 @@ public class DefaultBeanDefinition implements BeanDefinition {
     private String className;
 
     @Override
-    public String name() {
+    public String getName() {
         return name;
     }
 
     @Override
-    public DefaultBeanDefinition name(String name) {
+    public void setName(String name) {
         this.name = name;
-        return this;
     }
 
-    @Override
-    public String className() {
+    public String getClassName() {
         return className;
     }
 
-    @Override
-    public DefaultBeanDefinition className(String className) {
+    public void setClassName(String className) {
         this.className = className;
-        return this;
     }
-
-    @Override
-    public String toString() {
-        return "DefaultBeanDefinition{" +
-                "name='" + name + '\'' +
-                ", className='" + className + '\'' +
-                '}';
-    }
-
 }

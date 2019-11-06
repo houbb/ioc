@@ -12,28 +12,26 @@ public interface BeanDefinition {
      * @return 名称
      * @since 0.0.1
      */
-    String name();
+    String getName();
 
     /**
      * 设置名称
      * @param name 名称
-     * @return this
      * @since 0.0.1
      */
-    BeanDefinition name(final String name);
+    void setName(final String name);
 
     /**
      * 类名称
      * @return 类名称
      */
-    String className();
+    String getClassName();
 
     /**
      * 设置类名称
      * @param className 类名称
-     * @return this
      * @since 0.0.1
      */
-    BeanDefinition className(final String className);
+    void setClassName(final String className);
 
 }

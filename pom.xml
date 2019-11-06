@@ -21,11 +21,10 @@
 
         <!--============================== MAIN ==============================-->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.compiler.level>1.8</project.compiler.level>
+        <project.compiler.level>1.7</project.compiler.level>
 
         <!--============================== INTER ==============================-->
         <heaven.version>0.1.37</heaven.version>
-        <csv.version>0.0.6</csv.version>
         <json.version>0.1.1</json.version>
 
         <!--============================== OTHER ==============================-->
@@ -63,6 +62,14 @@
                 <version>${lombok.version}</version>
                 <scope>provided</scope>
             </dependency>
+
+            <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.62</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -89,6 +96,11 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
         </dependency>
 
     </dependencies>
@@ -162,7 +174,7 @@
     </build>
 
     <!--============================== ADD For sonatype START ==============================-->
-    <name>poseidon</name>
+    <name>ioc</name>
     <description>The web crawl base framework based on jsoup.</description>
 
     <parent>
@@ -178,8 +190,8 @@
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/houbb/poseidon</url>
-        <connection>https://github.com/houbb/poseidon.git</connection>
+        <url>https://github.com/houbb/ioc</url>
+        <connection>https://github.com/houbb/ioc.git</connection>
         <developerConnection>https://houbb.github.io/</developerConnection>
     </scm>
     <developers>

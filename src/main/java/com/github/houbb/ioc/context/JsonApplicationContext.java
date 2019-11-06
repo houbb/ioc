@@ -1,6 +1,15 @@
 package com.github.houbb.ioc.context;
 
+import com.alibaba.fastjson.JSON;
+import com.github.houbb.heaven.util.io.FileUtil;
+import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.ioc.core.impl.DefaultBeanFactory;
+import com.github.houbb.ioc.model.BeanDefinition;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * JSON 应用上下文
@@ -19,10 +28,26 @@ public class JsonApplicationContext extends DefaultBeanFactory {
         this.fileName = fileName;
 
         // 初始化配置
+        this.init();
     }
 
-
-
-
+    /**
+     * 初始化配置相关信息
+     *
+     * <pre>
+     *  new TypeReference<List<BeanDefinition>>(){}
+     * </pre>
+     * @since 0.0.1
+     */
+    private void init() {
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
+        final String jsonConfig = FileUtil.getFileContent(is);
+        List<BeanDefinition> beanDefinitions = JSON.parseArray(jsonConfig, BeanDefinition.class);
+        if(CollectionUtil.isNotEmpty(beanDefinitions)) {
+            for (BeanDefinition beanDefinition : beanDefinitions) {
+                super.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
+            }
+        }
+    }
 
 }
