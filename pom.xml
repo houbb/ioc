@@ -25,7 +25,7 @@
 
         <!--============================== INTER ==============================-->
         <heaven.version>0.1.37</heaven.version>
-        <json.version>0.1.1</json.version>
+        <json.version>0.1.2-SNAPSHOT</json.version>
 
         <!--============================== OTHER ==============================-->
         <junit.version>4.12</junit.version>
@@ -63,13 +63,6 @@
                 <scope>provided</scope>
             </dependency>
 
-            <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>fastjson</artifactId>
-                <version>1.2.62</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -96,11 +89,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
         </dependency>
 
     </dependencies>
