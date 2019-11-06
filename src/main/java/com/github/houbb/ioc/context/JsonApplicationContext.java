@@ -4,6 +4,7 @@ import com.github.houbb.heaven.util.io.FileUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.ioc.core.impl.DefaultBeanFactory;
 import com.github.houbb.ioc.model.BeanDefinition;
+import com.github.houbb.ioc.model.impl.DefaultBeanDefinition;
 import com.github.houbb.json.bs.JsonBs;
 
 import java.io.InputStream;
@@ -42,7 +43,7 @@ public class JsonApplicationContext extends DefaultBeanFactory {
     private void init() {
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
         final String jsonConfig = FileUtil.getFileContent(is);
-        List<BeanDefinition> beanDefinitions = JsonBs.deserializeArray(jsonConfig, BeanDefinition.class);
+        List<DefaultBeanDefinition> beanDefinitions = JsonBs.deserializeArray(jsonConfig, DefaultBeanDefinition.class);
         if(CollectionUtil.isNotEmpty(beanDefinitions)) {
             for (BeanDefinition beanDefinition : beanDefinitions) {
                 super.registerBeanDefinition(beanDefinition.getName(), beanDefinition);

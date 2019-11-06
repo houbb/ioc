@@ -25,7 +25,7 @@
 
         <!--============================== INTER ==============================-->
         <heaven.version>0.1.37</heaven.version>
-        <json.version>0.1.2-SNAPSHOT</json.version>
+        <json.version>0.1.2</json.version>
 
         <!--============================== OTHER ==============================-->
         <junit.version>4.12</junit.version>
