@@ -1,16 +1,13 @@
 package com.github.houbb.ioc.core.impl;
 
+import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.util.common.ArgUtil;
-import com.github.houbb.heaven.util.lang.ObjectUtil;
-import com.github.houbb.ioc.core.BeanFactory;
+import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.ioc.core.ListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
-import com.github.houbb.ioc.model.BeanDefinition;
-import com.github.houbb.ioc.util.ClassUtils;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
 /**
  * listable bean 工厂接口
@@ -20,9 +17,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultListableBeanFactory extends DefaultBeanFactory implements ListableBeanFactory {
 
     @Override
-    public <T> List<T> getBeans(Class<T> requiredType) {
+    public <T> List<T> getBeans(final Class<T> requiredType) {
+        ArgUtil.notNull(requiredType, "requiredType");
 
-        return null;
+        Set<String> beanNames = super.getBeanNames(requiredType);
+        if(CollectionUtil.isEmpty(beanNames)) {
+            throw new IocRuntimeException(requiredType + " bean names is empty!");
+        }
+
+        // 构建结果
+        return CollectionUtil.toList(beanNames, new IHandler<String, T>() {
+            @Override
+            public T handle(String name) {
+                return DefaultListableBeanFactory.super.getBean(name, requiredType);
+            }
+        });
     }
 
 }
