@@ -35,4 +35,32 @@ public interface BeanDefinition {
      */
     void setClassName(final String className);
 
+    /**
+     * 获取生命周期
+     * @return 获取生命周期
+     * @since 0.0.3
+     */
+    String getScope();
+
+    /**
+     * 设置是否单例
+     * @param scope 是否单例
+     * @since 0.0.3
+     */
+    void setScope(final String scope);
+
+    /**
+     * 是否为延迟加载
+     * @return 是否
+     * @since 0.0.3
+     */
+    boolean isLazyInit();
+
+    /**
+     * 设置是否为延迟加载
+     * @param isLazyInit 是否为延迟加载
+     * @since 0.0.3
+     */
+    void setLazyInit(final boolean isLazyInit);
+
 }

@@ -67,6 +67,32 @@ public class BeanFactoryTest {
     }
 
     /**
+     * 单例测试
+     * @since 0.0.3
+     */
+    @Test
+    public void singletonTest() {
+        BeanFactory singleton = new JsonApplicationContext("singleton/apple-singleton.json");
+
+        Apple singletonOne = singleton.getBean("apple", Apple.class);
+        Apple singletonTwo = singleton.getBean("apple", Apple.class);
+        Assert.assertSame(singletonOne, singletonTwo);
+    }
+
+    /**
+     * 多例测试
+     * @since 0.0.3
+     */
+    @Test
+    public void prototypeTest() {
+        BeanFactory singleton = new JsonApplicationContext("singleton/apple-prototype.json");
+
+        Apple singletonOne = singleton.getBean("apple", Apple.class);
+        Apple singletonTwo = singleton.getBean("apple", Apple.class);
+        Assert.assertNotSame(singletonOne, singletonTwo);
+    }
+
+    /**
      * 生成 apple json 测试
      * @since 0.0.1
      */
