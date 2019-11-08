@@ -79,9 +79,6 @@ public class BeanFactoryTest {
         beanDefinitions.add(apple);
 
         System.out.println(JsonBs.serialize(beanDefinitions));
-
-        System.out.println(JsonBs.deserialize("[{\"name\":\"apple\",\"className\":\"com.github.houbb.ioc.test.service.Apple\"}]",
-                beanDefinitions.getClass()));
     }
 
 }
