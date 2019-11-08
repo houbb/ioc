@@ -1,5 +1,6 @@
 package com.github.houbb.ioc.core.impl;
 
+import com.github.houbb.heaven.support.tuple.impl.Pair;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
@@ -7,8 +8,14 @@ import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
+import com.github.houbb.ioc.support.lifecycle.DisposableBean;
+import com.github.houbb.ioc.support.lifecycle.InitializingBean;
+import com.github.houbb.ioc.support.lifecycle.destroy.DefaultPreDestroyBean;
+import com.github.houbb.ioc.support.lifecycle.init.DefaultPostConstructBean;
 import com.github.houbb.ioc.util.ClassUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author binbin.hou
  * @since 0.0.1
  */
-public class DefaultBeanFactory implements BeanFactory {
+public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 对象信息 map
@@ -40,6 +47,12 @@ public class DefaultBeanFactory implements BeanFactory {
      * @since 0.0.2
      */
     private Map<Class, Set<String>> typeBeanNameMap = new ConcurrentHashMap<>();
+
+    /**
+     * 实例于 bean 定义信息 map
+     * @since 0.0.4
+     */
+    private List<Pair<Object, BeanDefinition>> instanceBeanDefinitionList = new ArrayList<>();
 
     /**
      * 注册对象定义信息
@@ -169,6 +182,17 @@ public class DefaultBeanFactory implements BeanFactory {
 
     /**
      * 根据对象定义信息创建对象
+     * （1）注解 {@link javax.annotation.PostConstruct}
+     * （2）添加 {@link com.github.houbb.ioc.support.lifecycle.InitializingBean} 初始化相关处理
+     * （3）添加 {@link BeanDefinition#getInitialize()} 初始化相关处理
+     *
+     * TODO:
+     * 1. 后期添加关于构造器信息的初始化
+     * 2. 添加对应的 BeanPostProcessor
+     *
+     * 如果想使用注解相关信息，考虑实现 AnnotationBeanDefinition 统一处理注解信息。
+     * 本期暂时忽略 (1)
+     *
      * @param beanDefinition 对象定义信息
      * @return 创建的对象信息
      * @since 0.0.1
@@ -176,7 +200,23 @@ public class DefaultBeanFactory implements BeanFactory {
     private Object createBean(final BeanDefinition beanDefinition) {
         String className = beanDefinition.getClassName();
         Class clazz = ClassUtils.getClass(className);
-        return ClassUtils.newInstance(clazz);
+        // 直接根据 clazz + beanDefinition 构建对应的信息。
+
+        Object instance = ClassUtils.newInstance(clazz);
+
+        //1. 初始化相关处理
+        //1.1 直接根据构造器
+        //1.2 根据构造器，属性，静态方法
+        //1.3 根据注解处理相关信息
+
+        //2. 初始化完成之后的调用
+        InitializingBean initializingBean = new DefaultPostConstructBean(instance, beanDefinition);
+        initializingBean.initialize();
+        //2.1 将初始化的信息加入列表中，便于后期销毁使用
+        Pair<Object, BeanDefinition> pair = Pair.of(instance, beanDefinition);
+        instanceBeanDefinitionList.add(pair);
+
+        return instance;
     }
 
     /**
@@ -189,6 +229,17 @@ public class DefaultBeanFactory implements BeanFactory {
     private Class getType(final BeanDefinition beanDefinition) {
         String className = beanDefinition.getClassName();
         return ClassUtils.getClass(className);
+    }
+
+    @Override
+    public void destroy() {
+        // 销毁所有的属性信息
+        System.out.println("destroy all beans start");
+        for(Pair<Object, BeanDefinition> entry : instanceBeanDefinitionList) {
+            DisposableBean disposableBean = new DefaultPreDestroyBean(entry.getValueOne(), entry.getValueTwo());
+            disposableBean.destroy();
+        }
+        System.out.println("destroy all beans end");
     }
 
 }

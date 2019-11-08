@@ -1,9 +1,6 @@
 package com.github.houbb.ioc.context;
 
 import com.github.houbb.heaven.util.io.FileUtil;
-import com.github.houbb.heaven.util.util.CollectionUtil;
-import com.github.houbb.ioc.core.impl.DefaultBeanFactory;
-import com.github.houbb.ioc.core.impl.DefaultListableBeanFactory;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.impl.DefaultBeanDefinition;
 import com.github.houbb.json.bs.JsonBs;
@@ -13,10 +10,14 @@ import java.util.List;
 
 /**
  * JSON 应用上下文
+ *
+ * 所有的 applicationContext 应该有一个完整的
+ *
+ * 读取文件：https://blog.csdn.net/feeltouch/article/details/83796764
  * @author binbin.hou
  * @since 0.0.1
  */
-public class JsonApplicationContext extends DefaultListableBeanFactory {
+public class JsonApplicationContext extends AbstractApplicationContext {
 
     /**
      * 文件名称
@@ -27,29 +28,22 @@ public class JsonApplicationContext extends DefaultListableBeanFactory {
     public JsonApplicationContext(String fileName) {
         this.fileName = fileName;
 
-        // 初始化配置
-        this.init();
+        super.init();
     }
 
     /**
-     * 初始化配置相关信息
-     *
-     * <pre>
-     *  new TypeReference<List<BeanDefinition>>(){}
-     * </pre>
-     *
-     * 读取文件：https://blog.csdn.net/feeltouch/article/details/83796764
-     * @since 0.0.1
+     * 构建对象属性列表
+     * @return 对象属性列表
+     * @since 0.0.4
      */
-    private void init() {
+    @Override
+    protected List<? extends BeanDefinition> buildBeanDefinitionList() {
+        //1. 读取配置信息
         InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName);
         final String jsonConfig = FileUtil.getFileContent(is);
-        List<DefaultBeanDefinition> beanDefinitions = JsonBs.deserializeArray(jsonConfig, DefaultBeanDefinition.class);
-        if(CollectionUtil.isNotEmpty(beanDefinitions)) {
-            for (BeanDefinition beanDefinition : beanDefinitions) {
-                super.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
-            }
-        }
+
+        //2. 配置信息转化为标准的 beanDefinition
+        return JsonBs.deserializeArray(jsonConfig, DefaultBeanDefinition.class);
     }
 
 }

@@ -2,7 +2,12 @@ package com.github.houbb.ioc.util;
 
 import com.github.houbb.heaven.annotation.CommonEager;
 import com.github.houbb.heaven.util.common.ArgUtil;
+import com.github.houbb.heaven.util.util.ArrayUtil;
+import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.exception.IocRuntimeException;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * <p> project: ioc-ClassUtils </p>
@@ -49,6 +54,27 @@ public final class ClassUtils {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new IocRuntimeException(e);
         }
+    }
+
+    /**
+     * 获取指定注解的方法
+     * @param tClass 雷西悉尼
+     * @param annotationClass 注解信息
+     * @return 方法的 optional 信息
+     * @since 0.0.4
+     */
+    public static Optional<Method> getMethodOptional(final Class tClass, final Class<? extends Annotation> annotationClass) {
+        final Method[] methods = tClass.getMethods();
+
+        if(ArrayUtil.isEmpty(methods)) {
+            return Optional.empty();
+        }
+        for(Method method : methods) {
+            if(method.isAnnotationPresent(annotationClass)) {
+                return Optional.of(method);
+            }
+        }
+        return Optional.empty();
     }
 
 }
