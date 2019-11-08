@@ -29,7 +29,6 @@
 
         <!--============================== OTHER ==============================-->
         <junit.version>4.12</junit.version>
-        <lombok.version>1.18.8</lombok.version>
     </properties>
 
     <dependencyManagement>
@@ -151,7 +150,7 @@
 
     <!--============================== ADD For sonatype START ==============================-->
     <name>ioc</name>
-    <description>The web crawl base framework based on jsoup.</description>
+    <description>The ioc framework simulator from spring.</description>
 
     <parent>
         <groupId>org.sonatype.oss</groupId>
