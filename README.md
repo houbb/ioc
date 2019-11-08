@@ -1,5 +1,10 @@
 # IoC
 
+Ioc 是一款 spring ioc 核心功能简化实现版本，便于学习和理解原理。
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.houbb/ioc/badge.svg)](http://mvnrepository.com/artifact/com.github.houbb/ioc)
+[![Coverage Status](https://coveralls.io/repos/github/houbb/ioc/badge.svg?branch=master)](https://coveralls.io/github/houbb/ioc?branch=master)
+
 ## 定义
 
 控制反转（Inversion of Control，缩写为IoC），是面向对象编程中的一种设计原则，可以用来减低计算机代码之间的耦合度。
