@@ -1,4 +1,4 @@
 [
-{"name":"apple","className":"com.github.houbb.ioc.test.service.Apple"},
-{"name":"apple2","className":"com.github.houbb.ioc.test.service.Apple"}
+  {"name":"apple","className":"com.github.houbb.ioc.test.service.Apple"},
+  {"name":"apple2","className":"com.github.houbb.ioc.test.service.Apple"}
 ]
