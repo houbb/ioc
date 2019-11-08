@@ -1,12 +1,9 @@
 package com.github.houbb.ioc.test.context;
 
-import com.github.houbb.heaven.util.io.FileUtil;
 import com.github.houbb.ioc.context.JsonApplicationContext;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.test.service.Apple;
 import org.junit.Test;
-
-import java.io.InputStream;
 
 /**
  * <p> project: ioc-JsonApplicationContextTest </p>
@@ -15,6 +12,7 @@ import java.io.InputStream;
  * @author Administrator
  * @since 0.0.1
  */
+@Deprecated
 public class JsonApplicationContextTest {
 
     @Test
