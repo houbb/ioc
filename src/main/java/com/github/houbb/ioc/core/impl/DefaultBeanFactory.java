@@ -1,6 +1,8 @@
 package com.github.houbb.ioc.core.impl;
 
+import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
+import com.github.houbb.heaven.util.lang.reflect.ClassTypeUtil;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
@@ -37,8 +39,19 @@ public class DefaultBeanFactory implements BeanFactory {
         this.beanDefinitionMap.put(beanName, beanDefinition);
     }
 
+    /**
+     * 获取 beanMap
+     * @return beanMap
+     * @since 0.0.2
+     */
+    protected Map<String, Object> getBeanMap() {
+        return this.beanMap;
+    }
+
     @Override
     public Object getBean(String beanName) {
+        ArgUtil.notNull(beanName, "beanName");
+
         Object bean = beanMap.get(beanName);
         if(ObjectUtil.isNotNull(bean)) {
             // 这里直接返回的是单例，如果用户指定为多例，则每次都需要新建。
@@ -72,9 +85,36 @@ public class DefaultBeanFactory implements BeanFactory {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getBean(String beanName, Class<T> tClass) {
+    public <T> T getBean(String beanName, Class<T> requiredType) {
+        ArgUtil.notNull(beanName, "beanName");
+        ArgUtil.notNull(requiredType, "requiredType");
+
         Object object = getBean(beanName);
         return (T)object;
+    }
+
+    @Override
+    public boolean containsBean(String beanName) {
+        ArgUtil.notNull(beanName, "beanName");
+
+        return beanDefinitionMap.keySet().contains(beanName);
+    }
+
+    @Override
+    public boolean isTypeMatch(String beanName, Class requiredType) {
+        ArgUtil.notNull(beanName, "beanName");
+        ArgUtil.notNull(requiredType, "requiredType");
+
+        Class<?> beanType = getType(beanName);
+        return requiredType.equals(beanType);
+    }
+
+    @Override
+    public Class<?> getType(String beanName) {
+        ArgUtil.notNull(beanName, "beanName");
+
+        Object bean = this.getBean(beanName);
+        return bean.getClass();
     }
 
 }

@@ -24,6 +24,7 @@ public interface BeanDefinition {
     /**
      * 类名称
      * @return 类名称
+     * @since 0.0.1
      */
     String getClassName();
 

@@ -17,6 +17,7 @@ public class DefaultBeanDefinition implements BeanDefinition {
 
     /**
      * 类名称
+     * @since 0.0.1
      */
     private String className;
 
@@ -30,10 +31,12 @@ public class DefaultBeanDefinition implements BeanDefinition {
         this.name = name;
     }
 
+    @Override
     public String getClassName() {
         return className;
     }
 
+    @Override
     public void setClassName(String className) {
         this.className = className;
     }
