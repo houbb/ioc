@@ -57,6 +57,8 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 注册对象定义信息
+     * @param beanName 属性信息
+     * @param beanDefinition 对象定义
      * @since 0.0.1
      */
     protected void registerBeanDefinition(final String beanName, final BeanDefinition beanDefinition) {
