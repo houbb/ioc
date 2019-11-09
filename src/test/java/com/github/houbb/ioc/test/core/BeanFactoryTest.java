@@ -92,19 +92,6 @@ public class BeanFactoryTest {
         Assert.assertNotSame(singletonOne, singletonTwo);
     }
 
-    /**
-     * 生成 apple json 测试
-     * @since 0.0.1
-     */
-    @Test
-    public void genAppleJsonTest() {
-        List<BeanDefinition> beanDefinitions = Guavas.newArrayList();
-        BeanDefinition apple = new DefaultBeanDefinition();
-        apple.setClassName("com.github.houbb.ioc.test.service.Apple");
-        apple.setName("apple");
-        beanDefinitions.add(apple);
 
-        System.out.println(JsonBs.serialize(beanDefinitions));
-    }
 
 }

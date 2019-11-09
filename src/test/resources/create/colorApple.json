@@ -1,0 +1,4 @@
+[
+{"name":"apple","className":"com.github.houbb.ioc.test.service.ColorApple"},
+{"className":"com.github.houbb.ioc.test.service.ColorWeightApple","constructorArgList":[{"ref":"apple"},{"type":"java.lang.Integer","value":"10"}],"lazyInit":false,"name":"weightApple"}
+]

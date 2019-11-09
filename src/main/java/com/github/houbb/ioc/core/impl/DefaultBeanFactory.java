@@ -11,6 +11,7 @@ import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.support.lifecycle.DisposableBean;
 import com.github.houbb.ioc.support.lifecycle.InitializingBean;
+import com.github.houbb.ioc.support.lifecycle.create.DefaultNewInstanceBean;
 import com.github.houbb.ioc.support.lifecycle.destroy.DefaultPreDestroyBean;
 import com.github.houbb.ioc.support.lifecycle.init.DefaultPostConstructBean;
 
@@ -202,12 +203,9 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         Class clazz = ClassUtil.getClass(className);
         // 直接根据 clazz + beanDefinition 构建对应的信息。
 
-        Object instance = ClassUtil.newInstance(clazz);
-
         //1. 初始化相关处理
-        //1.1 直接根据构造器
-        //1.2 根据构造器，属性，静态方法
-        //1.3 根据注解处理相关信息
+        Object instance = DefaultNewInstanceBean.getInstance()
+                .newInstance(this, beanDefinition);
 
         //2. 初始化完成之后的调用
         InitializingBean initializingBean = new DefaultPostConstructBean(instance, beanDefinition);

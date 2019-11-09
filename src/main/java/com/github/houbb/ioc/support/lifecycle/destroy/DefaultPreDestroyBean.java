@@ -1,18 +1,14 @@
 package com.github.houbb.ioc.support.lifecycle.destroy;
 
 import com.github.houbb.heaven.util.common.ArgUtil;
-import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
 import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
-import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.Optional;
-import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.support.lifecycle.DisposableBean;
 
 import javax.annotation.PreDestroy;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**

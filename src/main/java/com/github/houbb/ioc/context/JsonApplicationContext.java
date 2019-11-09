@@ -1,5 +1,6 @@
 package com.github.houbb.ioc.context;
 
+import com.alibaba.fastjson.JSON;
 import com.github.houbb.heaven.util.io.FileUtil;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.impl.DefaultBeanDefinition;
@@ -43,7 +44,7 @@ public class JsonApplicationContext extends AbstractApplicationContext {
         final String jsonConfig = FileUtil.getFileContent(is);
 
         //2. 配置信息转化为标准的 beanDefinition
-        return JsonBs.deserializeArray(jsonConfig, DefaultBeanDefinition.class);
+        return JSON.parseArray(jsonConfig, DefaultBeanDefinition.class);
     }
 
 }

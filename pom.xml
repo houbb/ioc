@@ -6,7 +6,7 @@
 
     <groupId>com.github.houbb</groupId>
     <artifactId>ioc</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.6</version>
 
     <properties>
         <!--============================== All Plugins START ==============================-->
@@ -47,12 +47,19 @@
                 <version>${json.version}</version>
             </dependency>
 
+
             <!--============================== OTHER ==============================-->
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
                 <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>1.2.62</version>
             </dependency>
 
         </dependencies>
@@ -76,6 +83,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
         </dependency>
 
     </dependencies>

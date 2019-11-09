@@ -31,7 +31,7 @@ Ioc 是一款 spring ioc 核心功能简化实现版本，便于学习和理解�
 <dependency>
     <groupId>com.github.houbb</groupId>
     <artifactId>ioc</artifactId>
-    <version>0.0.2</version>
+    <version>最新版本</version>
 </dependency>
 ```
 

@@ -1,6 +1,9 @@
 package com.github.houbb.ioc.model.impl;
 
 import com.github.houbb.ioc.model.BeanDefinition;
+import com.github.houbb.ioc.model.ConstructorArgDefinition;
+
+import java.util.List;
 
 /**
  * 默认对象定义属性
@@ -44,6 +47,18 @@ public class DefaultBeanDefinition implements BeanDefinition {
      * @since 0.0.4
      */
     private String destroy;
+
+    /**
+     * 工厂类方法
+     * @since 0.0.6
+     */
+    private String factoryMethod;
+
+    /**
+     * 构造器列表
+     * @since 0.0.6
+     */
+    private List<ConstructorArgDefinition> constructorArgList;
 
     @Override
     public String getName() {
@@ -104,4 +119,25 @@ public class DefaultBeanDefinition implements BeanDefinition {
     public void setDestroy(String destroy) {
         this.destroy = destroy;
     }
+
+    @Override
+    public String getFactoryMethod() {
+        return factoryMethod;
+    }
+
+    @Override
+    public void setFactoryMethod(String factoryMethod) {
+        this.factoryMethod = factoryMethod;
+    }
+
+    @Override
+    public List<ConstructorArgDefinition> getConstructorArgList() {
+        return constructorArgList;
+    }
+
+    @Override
+    public void setConstructorArgList(List<ConstructorArgDefinition> constructorArgList) {
+        this.constructorArgList = constructorArgList;
+    }
 }
+

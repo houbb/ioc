@@ -1,5 +1,7 @@
 package com.github.houbb.ioc.test.service;
 
+import com.github.houbb.ioc.support.converter.StringValueConverter;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 

@@ -1,5 +1,7 @@
 package com.github.houbb.ioc.model;
 
+import java.util.List;
+
 /**
  * 对象定义属性
  * @author binbin.hou
@@ -90,5 +92,33 @@ public interface BeanDefinition {
      * @since 0.0.4
      */
     String getDestroy();
+
+    /**
+     * 工厂类方法
+     * @param factoryMethod 工厂类方法
+     * @since 0.0.6
+     */
+    void setFactoryMethod(final String factoryMethod);
+
+    /**
+     * 获取工厂类方法名称
+     * @return 工厂类方法名称
+     * @since 0.0.6
+     */
+    String getFactoryMethod();
+
+    /**
+     * 构造器参数列表
+     * @return 构造器参数列表
+     * @since 0.0.6
+     */
+    List<ConstructorArgDefinition> getConstructorArgList();
+
+    /**
+     * 设置构造器参数定义列表
+     * @param constructorArgList 构造器参数列表
+     * @since 0.0.6
+     */
+    void setConstructorArgList(final List<ConstructorArgDefinition> constructorArgList);
 
 }
