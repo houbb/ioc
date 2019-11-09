@@ -4,6 +4,7 @@ import com.github.houbb.heaven.support.tuple.impl.Pair;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
+import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
@@ -12,7 +13,6 @@ import com.github.houbb.ioc.support.lifecycle.DisposableBean;
 import com.github.houbb.ioc.support.lifecycle.InitializingBean;
 import com.github.houbb.ioc.support.lifecycle.destroy.DefaultPreDestroyBean;
 import com.github.houbb.ioc.support.lifecycle.init.DefaultPostConstructBean;
-import com.github.houbb.ioc.util.ClassUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -199,10 +199,10 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      */
     private Object createBean(final BeanDefinition beanDefinition) {
         String className = beanDefinition.getClassName();
-        Class clazz = ClassUtils.getClass(className);
+        Class clazz = ClassUtil.getClass(className);
         // 直接根据 clazz + beanDefinition 构建对应的信息。
 
-        Object instance = ClassUtils.newInstance(clazz);
+        Object instance = ClassUtil.newInstance(clazz);
 
         //1. 初始化相关处理
         //1.1 直接根据构造器
@@ -228,18 +228,16 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      */
     private Class getType(final BeanDefinition beanDefinition) {
         String className = beanDefinition.getClassName();
-        return ClassUtils.getClass(className);
+        return ClassUtil.getClass(className);
     }
 
     @Override
     public void destroy() {
         // 销毁所有的属性信息
-        System.out.println("destroy all beans start");
         for(Pair<Object, BeanDefinition> entry : instanceBeanDefinitionList) {
             DisposableBean disposableBean = new DefaultPreDestroyBean(entry.getValueOne(), entry.getValueTwo());
             disposableBean.destroy();
         }
-        System.out.println("destroy all beans end");
     }
 
 }

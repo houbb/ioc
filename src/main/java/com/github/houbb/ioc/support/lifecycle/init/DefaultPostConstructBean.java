@@ -1,13 +1,15 @@
 package com.github.houbb.ioc.support.lifecycle.init;
 
+import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
+import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.support.lifecycle.InitializingBean;
-import com.github.houbb.ioc.util.ClassUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
@@ -36,14 +38,24 @@ public class DefaultPostConstructBean implements InitializingBean {
     private final Object instance;
 
     /**
+     * 对象实例类型
+     * @since 0.0.5
+     */
+    private final Class instanceClass;
+
+    /**
      * 对象属性定义
      * @since 0.0.4
      */
     private final BeanDefinition beanDefinition;
 
     public DefaultPostConstructBean(Object instance, BeanDefinition beanDefinition) {
+        ArgUtil.notNull(instance, "instance");
+        ArgUtil.notNull(beanDefinition, "beanDefinition");
+
         this.instance = instance;
         this.beanDefinition = beanDefinition;
+        this.instanceClass = instance.getClass();
     }
 
     @Override
@@ -61,24 +73,13 @@ public class DefaultPostConstructBean implements InitializingBean {
      * @since 0.0.4
      */
     private void postConstruct() {
-        Optional<Method> methodOptional = ClassUtils.getMethodOptional(instance.getClass(), PostConstruct.class);
+        Optional<Method> methodOptional = ReflectMethodUtil.getMethodOptional(instanceClass, PostConstruct.class);
         if(methodOptional.isNotPresent()) {
             return;
         }
 
-        //1. 信息校验
-        Method method = methodOptional.get();
-        Class<?>[] paramTypes = method.getParameterTypes();
-        if(ArrayUtil.isNotEmpty(paramTypes)) {
-            throw new IocRuntimeException("PostConstruct must be has no params.");
-        }
-
-        //2. 反射调用
-        try {
-            method.invoke(instance);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IocRuntimeException(e);
-        }
+        // 执行调用
+        ReflectMethodUtil.invokeNoArgsMethod(instance, methodOptional.get());
     }
 
     /**
@@ -102,16 +103,8 @@ public class DefaultPostConstructBean implements InitializingBean {
             return;
         }
 
-        try {
-            Method method = instance.getClass().getMethod(initName);
-            if(ObjectUtil.isNull(method)) {
-                return;
-            }
-
-            method.invoke(instance);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new IocRuntimeException(e);
-        }
+        final Method method = ClassUtil.getMethod(instanceClass, initName);
+        ReflectMethodUtil.invokeNoArgsMethod(instance, method);
     }
 
 }

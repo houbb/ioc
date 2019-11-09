@@ -1,14 +1,15 @@
 package com.github.houbb.ioc.support.lifecycle.destroy;
 
+import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
+import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.support.lifecycle.DisposableBean;
-import com.github.houbb.ioc.support.lifecycle.InitializingBean;
-import com.github.houbb.ioc.util.ClassUtils;
 
 import javax.annotation.PreDestroy;
 import java.lang.reflect.InvocationTargetException;
@@ -45,9 +46,19 @@ public class DefaultPreDestroyBean implements DisposableBean {
      */
     private final BeanDefinition beanDefinition;
 
+    /**
+     * 实例类型信息
+     * @since 0.0.5
+     */
+    private final Class instanceClass;
+
     public DefaultPreDestroyBean(Object instance, BeanDefinition beanDefinition) {
+        ArgUtil.notNull(instance, "instance");
+        ArgUtil.notNull(beanDefinition, "beanDefinition");
+
         this.instance = instance;
         this.beanDefinition = beanDefinition;
+        this.instanceClass = instance.getClass();
     }
 
     @Override
@@ -64,24 +75,13 @@ public class DefaultPreDestroyBean implements DisposableBean {
      * @since 0.0.4
      */
     private void preDestroy() {
-        Optional<Method> methodOptional = ClassUtils.getMethodOptional(instance.getClass(), PreDestroy.class);
+        Optional<Method> methodOptional = ReflectMethodUtil.getMethodOptional(instanceClass, PreDestroy.class);
         if(methodOptional.isNotPresent()) {
             return;
         }
 
-        //1. 信息校验
-        Method method = methodOptional.get();
-        Class<?>[] paramTypes = method.getParameterTypes();
-        if(ArrayUtil.isNotEmpty(paramTypes)) {
-            throw new IocRuntimeException("PostConstruct must be has no params.");
-        }
-
-        //2. 反射调用
-        try {
-            method.invoke(instance);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IocRuntimeException(e);
-        }
+        //执行执行调用
+        ReflectMethodUtil.invokeNoArgsMethod(instance, methodOptional.get());
     }
 
     /**
@@ -105,16 +105,8 @@ public class DefaultPreDestroyBean implements DisposableBean {
             return;
         }
 
-        try {
-            Method method = instance.getClass().getMethod(destroyName);
-            if(ObjectUtil.isNull(method)) {
-                return;
-            }
-
-            method.invoke(instance);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new IocRuntimeException(e);
-        }
+        final Method method = ClassUtil.getMethod(instanceClass, destroyName);
+        ReflectMethodUtil.invoke(instance, method);
     }
 
 }
