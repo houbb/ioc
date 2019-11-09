@@ -77,11 +77,19 @@ apple.color();
 Apple color: red.
 ```
 
-# 源码分析
+# 分支说明
 
-[01-BeanFactory 基本实现]()
+[v0.0.1-BeanFactory 基本实现](https://github.com/houbb/ioc/tree/release_0.0.1)
 
-[02-ListBeanFactory 基本实现]()
+[v0.0.2-ListBeanFactory 基本实现](https://github.com/houbb/ioc/tree/release_0.0.2)
+
+[v0.0.3-单例和延迟加载](https://github.com/houbb/ioc/tree/release_0.0.3)
+
+[v0.0.4-初始化和销毁方法](https://github.com/houbb/ioc/tree/release_0.0.4)
+
+[v0.0.5-RespCode 添加和代码优化](https://github.com/houbb/ioc/tree/release_0.0.5)
+
+[v0.0.6-构造器和 factoryMethod 新建对象](https://github.com/houbb/ioc/tree/release_0.0.6)
 
 # 拓展阅读
 
