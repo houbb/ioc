@@ -5,6 +5,8 @@ import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.support.lifecycle.NewInstanceBean;
+import com.github.houbb.ioc.support.lifecycle.property.impl.DefaultBeanPropertyProcessor;
+
 /**
  * 默认新建对象实例的实现
  * @author binbin.hou
@@ -30,16 +32,25 @@ public class DefaultNewInstanceBean implements NewInstanceBean {
 
     @Override
     public Object newInstance(BeanFactory beanFactory, BeanDefinition beanDefinition) {
+        Object instance;
+
         //1. 工厂方法创建
         Object factoryMethodBean = FactoryMethodNewInstanceBean.getInstance()
                 .newInstance(beanFactory, beanDefinition);
         if(ObjectUtil.isNotNull(factoryMethodBean)) {
-            return factoryMethodBean;
+            instance = factoryMethodBean;
+        } else {
+            //2. 根据构造器创建
+            instance = ConstructorNewInstanceBean.getInstance()
+                    .newInstance(beanFactory, beanDefinition);
         }
 
-        //2. 根据构造器创建
-        return ConstructorNewInstanceBean.getInstance()
-                .newInstance(beanFactory, beanDefinition);
+        //3. 属性设置
+        DefaultBeanPropertyProcessor.getInstance()
+                .propertyProcessor(beanFactory, instance, beanDefinition.getPropertyArgList());
+
+        //4. 返回结果
+        return instance;
     }
 
 }

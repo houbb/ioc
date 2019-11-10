@@ -1,0 +1,1 @@
+[{"name":"book","className":"com.github.houbb.ioc.test.model.Book","lazyInit":false},{"name":"user","className":"com.github.houbb.ioc.test.model.User","lazyInit":false,"propertyArgList":[{"name":"name","type":"java.lang.String","value":"helen"},{"name":"book","ref":"book"}]}]

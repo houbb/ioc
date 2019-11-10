@@ -79,18 +79,20 @@ public class BeanFactoryTest {
         Assert.assertSame(singletonOne, singletonTwo);
     }
 
-    /**
-     * 多例测试
-     * @since 0.0.3
-     */
-    @Test
-    public void prototypeTest() {
-        BeanFactory singleton = new JsonApplicationContext("singleton/apple-prototype.json");
-
-        Apple singletonOne = singleton.getBean("apple", Apple.class);
-        Apple singletonTwo = singleton.getBean("apple", Apple.class);
-        Assert.assertNotSame(singletonOne, singletonTwo);
-    }
+//    /**
+//     * 多例测试
+//     * @since 0.0.3
+//     */
+//    @Test
+//    public void prototypeTest() {
+//        final String config = "singleton/apple-prototype.js111on";
+//        BeanFactory singleton = new JsonApplicationContext(config);
+//
+//        Apple singletonOne = singleton.getBean("apple", Apple.class);
+//        Apple singletonTwo = singleton.getBean("apple", Apple.class);
+//
+//        Assert.assertNotSame(singletonOne, singletonTwo);
+//    }
 
 
 

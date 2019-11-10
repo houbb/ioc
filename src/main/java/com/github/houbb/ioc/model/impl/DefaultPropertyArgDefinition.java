@@ -1,31 +1,48 @@
 package com.github.houbb.ioc.model.impl;
 
-import com.github.houbb.ioc.model.ConstructorArgDefinition;
+import com.github.houbb.ioc.model.PropertyArgDefinition;
 
 /**
- * 构造器参数定义信息
+ * 默认属性属性参数
+ * 
  * @author binbin.hou
- * @since 0.0.6
+ * @since 0.0.7
  */
-public class DefaultConstructorArgDefinition implements ConstructorArgDefinition {
+public class DefaultPropertyArgDefinition implements PropertyArgDefinition {
+
+    /**
+     * 属性名称
+     * @since 0.0.7
+     */
+    private String name;
 
     /**
      * 类型
-     * @since 0.0.6
+     * @since 0.0.7
      */
     private String type;
 
     /**
      * 参数值
-     * @since 0.0.6
+     * @since 0.0.7
      */
     private String value;
 
     /**
      * 引用名称
-     * @since 0.0.6
+     * @since 0.0.7
      */
     private String ref;
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
     @Override
     public String getType() {
@@ -59,8 +76,9 @@ public class DefaultConstructorArgDefinition implements ConstructorArgDefinition
 
     @Override
     public String toString() {
-        return "DefaultConstructorArgDefinition{" +
-                "type='" + type + '\'' +
+        return "DefaultPropertyArgDefinition{" +
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
                 ", value='" + value + '\'' +
                 ", ref='" + ref + '\'' +
                 '}';

@@ -2,6 +2,7 @@ package com.github.houbb.ioc.model.impl;
 
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
+import com.github.houbb.ioc.model.PropertyArgDefinition;
 
 import java.util.List;
 
@@ -59,6 +60,12 @@ public class DefaultBeanDefinition implements BeanDefinition {
      * @since 0.0.6
      */
     private List<ConstructorArgDefinition> constructorArgList;
+
+    /**
+     * 属性参数列表
+     * @since 0.0.7
+     */
+    private List<PropertyArgDefinition> propertyArgList;
 
     @Override
     public String getName() {
@@ -139,5 +146,16 @@ public class DefaultBeanDefinition implements BeanDefinition {
     public void setConstructorArgList(List<ConstructorArgDefinition> constructorArgList) {
         this.constructorArgList = constructorArgList;
     }
+
+    @Override
+    public List<PropertyArgDefinition> getPropertyArgList() {
+        return propertyArgList;
+    }
+
+    @Override
+    public void setPropertyArgList(List<PropertyArgDefinition> propertyArgList) {
+        this.propertyArgList = propertyArgList;
+    }
+
 }
 

@@ -4,11 +4,14 @@ import com.github.houbb.heaven.support.tuple.impl.Pair;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
+import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
+import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.support.lifecycle.DisposableBean;
 import com.github.houbb.ioc.support.lifecycle.InitializingBean;
 import com.github.houbb.ioc.support.lifecycle.create.DefaultNewInstanceBean;
@@ -72,10 +75,41 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         this.registerTypeBeanNames(beanName, beanDefinition);
 
         //3. 初始化 bean 信息
-        final boolean isLazyInit = beanDefinition.isLazyInit();
-        if(!isLazyInit) {
+        if(needEagerCreateSingleton(beanDefinition)) {
             this.registerSingletonBean(beanName, beanDefinition);
         }
+    }
+
+    /**
+     * 是否需要新建单例
+     * （1）如果不需要立刻加载，则进行延迟处理
+     * （2）如果存在构造器创建，则判断是否存在 dependsOn
+     * 如果 {@link #beanMap} 中包含所有依赖对象，则直接创建，否则需要等待。
+     * @param beanDefinition 定义信息
+     * @return 是否
+     * @since 0.0.7
+     */
+    private boolean needEagerCreateSingleton(final BeanDefinition beanDefinition) {
+        ArgUtil.notNull(beanDefinition, "beanDefinition");
+
+        if(beanDefinition.isLazyInit()) {
+            return false;
+        }
+        List<ConstructorArgDefinition> argDefinitionList = beanDefinition.getConstructorArgList();
+        if(CollectionUtil.isNotEmpty(argDefinitionList)) {
+            // 判断是否存在依赖
+            for(ConstructorArgDefinition argDefinition : argDefinitionList) {
+                String ref = argDefinition.getRef();
+                if(StringUtil.isNotEmpty(ref)) {
+                    Object instance = this.beanMap.get(ref);
+                    if(ObjectUtil.isNull(instance)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -201,10 +235,6 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * @since 0.0.1
      */
     private Object createBean(final BeanDefinition beanDefinition) {
-        String className = beanDefinition.getClassName();
-        Class clazz = ClassUtil.getClass(className);
-        // 直接根据 clazz + beanDefinition 构建对应的信息。
-
         //1. 初始化相关处理
         Object instance = DefaultNewInstanceBean.getInstance()
                 .newInstance(this, beanDefinition);

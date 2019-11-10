@@ -9,6 +9,8 @@ import com.github.houbb.json.bs.JsonBs;
  */
 public final class StringValueConverterFactory {
 
+    private StringValueConverterFactory(){}
+
     /**
      * 获取转换后的值
      * @param string 字符串

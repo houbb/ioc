@@ -1,11 +1,11 @@
 package com.github.houbb.ioc.test.core;
 
-import com.alibaba.fastjson.JSON;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.model.impl.DefaultBeanDefinition;
 import com.github.houbb.ioc.model.impl.DefaultConstructorArgDefinition;
+import com.github.houbb.json.bs.JsonBs;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -24,9 +24,9 @@ public class GenJsonTest {
     @Test
     public void genAppleJsonTest() {
         List<BeanDefinition> beanDefinitions = Guavas.newArrayList();
-        BeanDefinition apple = new DefaultBeanDefinition();
-        apple.setName("weightApple");
-        apple.setClassName("com.github.houbb.ioc.test.service.ColorWeightApple");
+        BeanDefinition weightApple = new DefaultBeanDefinition();
+        weightApple.setName("weightApple");
+        weightApple.setClassName("com.github.houbb.ioc.test.service.ColorWeightApple");
 
         ConstructorArgDefinition argRef = new DefaultConstructorArgDefinition();
         argRef.setRef("apple");
@@ -35,10 +35,20 @@ public class GenJsonTest {
         argWeight.setType("java.lang.Integer");
         argWeight.setValue("10");
 
-        apple.setConstructorArgList(Arrays.asList(argRef, argWeight));
+        weightApple.setConstructorArgList(Arrays.asList(argRef, argWeight));
+        beanDefinitions.add(weightApple);
+
+        BeanDefinition apple = new DefaultBeanDefinition();
+        apple.setName("apple");
+        apple.setClassName("com.github.houbb.ioc.test.service.ColorApple");
         beanDefinitions.add(apple);
 
-        System.out.println(JSON.toJSONString(beanDefinitions));
+        String json = JsonBs.serialize(beanDefinitions);
+        System.out.println(json);
+
+        System.out.println("===========================");
+
+        System.out.println(JsonBs.deserializeArray(json, BeanDefinition.class));
     }
 
 }
