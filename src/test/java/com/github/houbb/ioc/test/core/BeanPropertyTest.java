@@ -56,7 +56,6 @@ public class BeanPropertyTest {
 
     /**
      * 测试
-     * TODO: 这里估计是 JsonBs 存在反序列的 BUG，导致名称缺失。
      * 下一次修复。
      * @since 0.0.2
      */
