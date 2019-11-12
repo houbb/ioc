@@ -91,6 +91,8 @@ Apple color: red.
 
 [v0.0.6-构造器和 factoryMethod 新建对象](https://github.com/houbb/ioc/tree/release_0.0.6)
 
+[v0.0.7-property 属性设置](https://github.com/houbb/ioc/tree/release_0.0.7)
+
 # 拓展阅读
 
 [Java IOC-00-ioc 是什么](https://houbb.github.io/2019/11/06/java-ioc-01-overview)

@@ -24,8 +24,8 @@
         <project.compiler.level>1.7</project.compiler.level>
 
         <!--============================== INTER ==============================-->
-        <heaven.version>0.1.40</heaven.version>
-        <json.version>0.1.4</json.version>
+        <heaven.version>0.1.42</heaven.version>
+        <json.version>0.1.7</json.version>
 
         <!--============================== OTHER ==============================-->
         <junit.version>4.12</junit.version>

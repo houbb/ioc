@@ -21,9 +21,9 @@ public class MethodUtils {
      * 调用 setter 方法，进行设置值
      * @since 0.0.7
      */
-    public static void invokeSetterMetthod(final Object instance,
-                                           final String propertyName,
-                                           final Object value) {
+    public static void invokeSetterMethod(final Object instance,
+                                          final String propertyName,
+                                          final Object value) {
         ArgUtil.notNull(instance, "instance");
         ArgUtil.notNull(propertyName, "propertyName");
         if(ObjectUtil.isNull(value)) {
