@@ -3,9 +3,13 @@ package com.github.houbb.ioc.support.lifecycle.create;
 import com.github.houbb.heaven.annotation.ThreadSafe;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.ioc.core.BeanFactory;
+import com.github.houbb.ioc.core.ListableBeanFactory;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.support.lifecycle.NewInstanceBean;
 import com.github.houbb.ioc.support.lifecycle.property.impl.DefaultBeanPropertyProcessor;
+import com.github.houbb.ioc.support.processor.BeanPostProcessor;
+
+import java.util.List;
 
 /**
  * 默认新建对象实例的实现
@@ -45,9 +49,20 @@ public class DefaultNewInstanceBean implements NewInstanceBean {
                     .newInstance(beanFactory, beanDefinition);
         }
 
+        //2.1 通知 BeanPostProcessor
+        final String beanName = beanDefinition.getName();
+        ListableBeanFactory listableBeanFactory = (ListableBeanFactory)beanFactory;
+        List<BeanPostProcessor> beanPostProcessorList = listableBeanFactory.getBeans(BeanPostProcessor.class);
+        for(BeanPostProcessor processor : beanPostProcessorList) {
+            instance = processor.beforePropertySet(beanName, instance);
+        }
+
         //3. 属性设置
         DefaultBeanPropertyProcessor.getInstance()
                 .propertyProcessor(beanFactory, instance, beanDefinition.getPropertyArgList());
+        for(BeanPostProcessor processor : beanPostProcessorList) {
+            instance = processor.afterPropertySet(beanName, instance);
+        }
 
         //4. 返回结果
         return instance;

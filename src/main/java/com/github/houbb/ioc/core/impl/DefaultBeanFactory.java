@@ -1,27 +1,28 @@
 package com.github.houbb.ioc.core.impl;
 
+import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.support.tuple.impl.Pair;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
+import com.github.houbb.ioc.support.aware.BeanCreateAware;
+import com.github.houbb.ioc.support.aware.BeanNameAware;
 import com.github.houbb.ioc.support.lifecycle.DisposableBean;
 import com.github.houbb.ioc.support.lifecycle.InitializingBean;
 import com.github.houbb.ioc.support.lifecycle.create.DefaultNewInstanceBean;
 import com.github.houbb.ioc.support.lifecycle.destroy.DefaultPreDestroyBean;
 import com.github.houbb.ioc.support.lifecycle.init.DefaultPostConstructBean;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -68,15 +69,30 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         ArgUtil.notEmpty(beanName, "beanName");
         ArgUtil.notNull(beanDefinition, "beanDefinition");
 
-        // 这里可以添加监听器
         this.beanDefinitionMap.put(beanName, beanDefinition);
 
         //2. 注册类型和 beanNames 信息
         this.registerTypeBeanNames(beanName, beanDefinition);
 
+        //2.1 添加监听器
+        this.notifyAllBeanNameAware(beanName);
+
         //3. 初始化 bean 信息
         if(needEagerCreateSingleton(beanDefinition)) {
             this.registerSingletonBean(beanName, beanDefinition);
+        }
+    }
+
+    /**
+     * 通知所有的 beanName Aware 信息
+     * @param beanName 属性信息
+     * @since 0.0.8
+     */
+    private void notifyAllBeanNameAware(final String beanName) {
+        List<BeanNameAware> awareList = this.getBeans(BeanNameAware.class);
+
+        for(BeanNameAware aware : awareList) {
+            aware.setBeanName(beanName);
         }
     }
 
@@ -119,13 +135,15 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * @since 0.0.2
      */
     private void registerTypeBeanNames(final String beanName, final BeanDefinition beanDefinition) {
-        final Class type = getType(beanDefinition);
-        Set<String> beanNameSet = typeBeanNameMap.get(type);
-        if(ObjectUtil.isNull(beanNameSet)) {
-            beanNameSet = Guavas.newHashSet();
+        final Set<Class> typeSet = getTypeSet(beanDefinition);
+        for(Class type : typeSet) {
+            Set<String> beanNameSet = typeBeanNameMap.get(type);
+            if(ObjectUtil.isNull(beanNameSet)) {
+                beanNameSet = Guavas.newHashSet();
+            }
+            beanNameSet.add(beanName);
+            typeBeanNameMap.put(type, beanNameSet);
         }
-        beanNameSet.add(beanName);
-        typeBeanNameMap.put(type, beanNameSet);
     }
 
     /**
@@ -159,9 +177,33 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * @return bean 名称列表
      * @since 0.0.2
      */
-    Set<String> getBeanNames(final Class requiredType) {
+    protected Set<String> getBeanNames(final Class requiredType) {
         ArgUtil.notNull(requiredType, "requiredType");
         return typeBeanNameMap.get(requiredType);
+    }
+
+    /**
+     * 获取 beans 信息列表
+     * @param requiredType 指定类型
+     * @param <T> 泛型
+     * @return 结果列表
+     * @since 0.0.8
+     */
+    protected <T> List<T> getBeans(final Class<T> requiredType) {
+        ArgUtil.notNull(requiredType, "requiredType");
+
+        Set<String> beanNames = this.getBeanNames(requiredType);
+        if(CollectionUtil.isEmpty(beanNames)) {
+            return Guavas.newArrayList();
+        }
+
+        // 构建结果
+        return CollectionUtil.toList(beanNames, new IHandler<String, T>() {
+            @Override
+            public T handle(String name) {
+                return getBean(name, requiredType);
+            }
+        });
     }
 
     @Override
@@ -223,10 +265,6 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * （2）添加 {@link com.github.houbb.ioc.support.lifecycle.InitializingBean} 初始化相关处理
      * （3）添加 {@link BeanDefinition#getInitialize()} 初始化相关处理
      *
-     * TODO:
-     * 1. 后期添加关于构造器信息的初始化
-     * 2. 添加对应的 BeanPostProcessor
-     *
      * 如果想使用注解相关信息，考虑实现 AnnotationBeanDefinition 统一处理注解信息。
      * 本期暂时忽略 (1)
      *
@@ -236,6 +274,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      */
     private Object createBean(final BeanDefinition beanDefinition) {
         //1. 初始化相关处理
+        final String beanName = beanDefinition.getName();
         Object instance = DefaultNewInstanceBean.getInstance()
                 .newInstance(this, beanDefinition);
 
@@ -246,24 +285,53 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         Pair<Object, BeanDefinition> pair = Pair.of(instance, beanDefinition);
         instanceBeanDefinitionList.add(pair);
 
+        //3. 通知监听者
+        this.notifyAllBeanCreateAware(beanName, instance);
         return instance;
     }
 
     /**
-     * 获取类型信息
-     * （1）这里主要是一种
-     * @param beanDefinition 对象属性
-     * @return 对应的 bean 信息
-     * @since 0.0.2
+     * 通知所有对象创建监听器
+     * @param name 名称
+     * @param instance 实例
+     * @since 0.0.8
      */
-    private Class getType(final BeanDefinition beanDefinition) {
-        String className = beanDefinition.getClassName();
-        return ClassUtil.getClass(className);
+    private void notifyAllBeanCreateAware(final String name, final Object instance) {
+        List<BeanCreateAware> awareList = getBeans(BeanCreateAware.class);
+
+        for(BeanCreateAware aware : awareList) {
+            aware.setBeanCreate(name, instance);
+        }
     }
+
+    /**
+     * 获取类型集合
+     * （1）当前类信息
+     * （2）所有的接口类信息
+     * @param beanDefinition 对象定义
+     * @return 类型集合
+     * @since 0.0.8
+     */
+    private Set<Class> getTypeSet(final BeanDefinition beanDefinition) {
+        Set<Class> classSet = Guavas.newHashSet();
+
+        String className = beanDefinition.getClassName();
+        Class currentClass = ClassUtil.getClass(className);
+        classSet.add(currentClass);
+
+        Class[] interfaces = currentClass.getInterfaces();
+        if(ArrayUtil.isNotEmpty(interfaces)) {
+            classSet.addAll(Arrays.asList(interfaces));
+        }
+        return classSet;
+    }
+
 
     @Override
     public void destroy() {
         // 销毁所有的属性信息
+        // 这里的销毁严格来说，还有很多事情要做。
+        // 比如销毁的顺序：最外层没有依赖的开始销毁，依次往里，直到销毁全部。可能会出现循环依赖，类似于 GC。
         for(Pair<Object, BeanDefinition> entry : instanceBeanDefinitionList) {
             DisposableBean disposableBean = new DefaultPreDestroyBean(entry.getValueOne(), entry.getValueTwo());
             disposableBean.destroy();
