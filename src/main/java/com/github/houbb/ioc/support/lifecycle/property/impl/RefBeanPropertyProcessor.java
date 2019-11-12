@@ -35,7 +35,7 @@ class RefBeanPropertyProcessor implements SingleBeanPropertyProcessor {
         final String refStr = propertyArgDefinition.getRef();
 
         Object ref = beanFactory.getBean(refStr);
-        MethodUtils.invokeSetterMetthod(instance, propertyArgDefinition.getName(), ref);
+        MethodUtils.invokeSetterMethod(instance, propertyArgDefinition.getName(), ref);
     }
 
 }

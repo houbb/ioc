@@ -25,7 +25,7 @@ public class BeanPropertyTest {
 
     /**
      * 生成 apple json 测试
-     * @since 0.0.1
+     * @since 0.0.6
      */
     @Test
     public void genUserJsonTest() {
@@ -55,9 +55,8 @@ public class BeanPropertyTest {
     }
 
     /**
-     * 测试
-     * 下一次修复。
-     * @since 0.0.2
+     * 对象属性测试
+     * @since 0.0.7
      */
     @Test
     public void beanPropertyTest() {
