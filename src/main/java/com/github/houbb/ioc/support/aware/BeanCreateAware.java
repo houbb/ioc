@@ -15,6 +15,7 @@ public interface BeanCreateAware extends Aware {
     /**
      * 设值创建的对象
      * @param name bean 名称
+     * @param instance 实例
      * @throws IocRuntimeException 运行时异常
      * @since 0.0.8
      */
