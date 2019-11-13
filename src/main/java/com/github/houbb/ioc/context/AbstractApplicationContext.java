@@ -1,17 +1,20 @@
 package com.github.houbb.ioc.context;
 
-import com.github.houbb.bean.mapping.core.util.BeanUtil;
+import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
+import com.github.houbb.heaven.util.util.MapUtil;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.impl.DefaultListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
+import com.github.houbb.ioc.model.PropertyArgDefinition;
 import com.github.houbb.ioc.support.aware.ApplicationContextAware;
 import com.github.houbb.ioc.support.processor.ApplicationContextPostProcessor;
 
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +29,10 @@ import java.util.Map;
 public abstract class AbstractApplicationContext extends DefaultListableBeanFactory implements ApplicationContext {
 
     /**
-     * 抽象定义 map
+     * 全部的对象定义 map
      * @since 0.0.9
      */
-    private Map<String, BeanDefinition> abstractDefinitionMap = new IdentityHashMap<>();
+    private Map<String, BeanDefinition> beanDefinitionMap = Guavas.newHashMap();
 
     /**
      * 子对象定义类表
@@ -38,10 +41,10 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
     private List<BeanDefinition> childBeanDefinitionList = Guavas.newArrayList();
 
     /**
-     * 所有的对象信息列表
+     * 抽象的对象信息列表
      * @since 0.0.9
      */
-    private List<BeanDefinition> beanDefinitionList = Guavas.newArrayList();
+    private List<BeanDefinition> abstractDefinitionList = Guavas.newArrayList();
 
     /**
      * 可创建的定义列表信息
@@ -60,10 +63,10 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
      */
     protected void init() {
         // 原始数据信息
-        beanDefinitionList = buildBeanDefinitionList();
+        List<BeanDefinition> beanDefinitionList = buildBeanDefinitionList();
 
         // 这里对 bean 进行统一的处理
-        this.buildCreateAbleBeanDefinitionList();
+        this.buildCreateAbleBeanDefinitionList(beanDefinitionList);
 
         // 允许用户自定义的部分。
         createAbleDefinitionList = this.postProcessor(createAbleDefinitionList);
@@ -80,16 +83,20 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
      * 对象定义列表
      * （1）将 abstract 类型的 beanDefine 区分开。
      * （2）对 parent 指定的 beanDefine 进行属性赋值处理。
+     * @param beanDefinitionList 所有的对象列表
      * @since 0.0.9
      */
-    void buildCreateAbleBeanDefinitionList() {
+    void buildCreateAbleBeanDefinitionList(final List<BeanDefinition> beanDefinitionList) {
         // 特殊类型首先进行处理
         for(BeanDefinition beanDefinition : beanDefinitionList) {
             final String name = beanDefinition.getName();
             final String parentName = beanDefinition.getParentName();
+
+            beanDefinitionMap.put(name, beanDefinition);
+
             if(beanDefinition.isAbstractClass()) {
-                abstractDefinitionMap.put(name, beanDefinition);
-            } else if(StringUtil.isEmpty(parentName)) {
+                abstractDefinitionList.add(beanDefinition);
+            } else if(StringUtil.isNotEmpty(parentName)) {
                 childBeanDefinitionList.add(beanDefinition);
             } else {
                 createAbleDefinitionList.add(beanDefinition);
@@ -115,17 +122,64 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
                 throw new IocRuntimeException(name + " parent bean is ref to itself!");
             }
 
-            BeanDefinition abstractDefinition = abstractDefinitionMap.get(parentName);
-            if(ObjectUtil.isNull(abstractDefinition)) {
+            BeanDefinition parentDefinition = beanDefinitionMap.get(parentName);
+            if(ObjectUtil.isNull(parentDefinition)) {
                 throw new IocRuntimeException(parentName +" not found !");
             }
 
-            BeanDefinition newChild = abstractDefinition.clone();
-            BeanUtil.copyProperties(child, newChild);
-            newChild.setAbstractClass(false);
+            BeanDefinition newChild = buildChildBeanDefinition(child, parentDefinition);
+            // 设置所有子类不为 null 的属性。
+            newChild.setName(name);
+
             createAbleDefinitionList.add(newChild);
         }
     }
+
+    /**
+     * 构建新的子类属性定义
+     * 注意：
+     * （1）为了简化，只继承 property 属性信息。
+     * （2）父类的属性，子类必须全部都有，否则就会报错，暂时不做优化处理。
+     *
+     * 核心流程：
+     *
+     * （1）获取 child 中的所有 property 属性
+     * （2）获取 parent 中所有的 property 属性
+     * （3）进行过滤处理，相同的以  child 为准。
+     *
+     * @param child 子类
+     * @param parent 父类
+     * @return 属性定义
+     * @since 0.0.9
+     */
+    private BeanDefinition buildChildBeanDefinition(final BeanDefinition child,
+                                                    final BeanDefinition parent) {
+        List<PropertyArgDefinition> childList = Guavas.newArrayList(child.getPropertyArgList());
+
+        Map<String, PropertyArgDefinition> childArgsMap = MapUtil.toMap(child.getPropertyArgList(), new IHandler<PropertyArgDefinition, String>() {
+            @Override
+            public String handle(PropertyArgDefinition propertyArgDefinition) {
+                return propertyArgDefinition.getName();
+            }
+        });
+
+        List<PropertyArgDefinition> parentArgs = parent.getPropertyArgList();
+        if(CollectionUtil.isNotEmpty(parentArgs)) {
+            for(PropertyArgDefinition parentArg : parentArgs) {
+                String name = parentArg.getName();
+                if(childArgsMap.containsKey(name)) {
+                    continue;
+                }
+
+                // 不包含的，则进行添加
+                childList.add(parentArg);
+            }
+        }
+
+        child.setPropertyArgList(childList);
+        return child;
+    }
+
 
     /**
      * 循环执行 bean 信息处理

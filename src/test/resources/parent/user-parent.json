@@ -1,0 +1,3 @@
+[{"name":"copyUser","className":"com.github.houbb.ioc.test.model.User","parentName":"user"},
+{"name":"user","className":"com.github.houbb.ioc.test.model.User","lazyInit":false,
+    "propertyArgList":[{"name":"name","type":"java.lang.String","value":"helen"}]}]

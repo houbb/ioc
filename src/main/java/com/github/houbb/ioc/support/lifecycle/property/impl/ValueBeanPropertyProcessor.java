@@ -2,11 +2,11 @@ package com.github.houbb.ioc.support.lifecycle.property.impl;
 
 import com.github.houbb.heaven.annotation.ThreadSafe;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
 import com.github.houbb.ioc.support.converter.StringValueConverterFactory;
 import com.github.houbb.ioc.support.lifecycle.property.SingleBeanPropertyProcessor;
-import com.github.houbb.ioc.utils.MethodUtils;
 
 /**
  * 对象属性设置类。
@@ -38,7 +38,7 @@ class ValueBeanPropertyProcessor implements SingleBeanPropertyProcessor {
 
         Class type = ClassUtil.getClass(typeStr);
         Object value = StringValueConverterFactory.convertValue(valueStr, type);
-        MethodUtils.invokeSetterMethod(instance, propertyArgDefinition.getName(), value);
+        ReflectMethodUtil.invokeSetterMethod(instance, propertyArgDefinition.getName(), value);
     }
 
 }

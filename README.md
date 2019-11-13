@@ -93,6 +93,10 @@ Apple color: red.
 
 [v0.0.7-property 属性设置](https://github.com/houbb/ioc/tree/release_0.0.7)
 
+[v0.0.8-Aware 监听器及 PostProcessor](https://github.com/houbb/ioc/tree/release_0.0.8)
+
+[v0.0.9-Parent 属性继承](https://github.com/houbb/ioc/tree/release_0.0.9)
+
 # 拓展阅读
 
 [Java IOC-00-ioc 是什么](https://houbb.github.io/2019/11/06/java-ioc-01-overview)

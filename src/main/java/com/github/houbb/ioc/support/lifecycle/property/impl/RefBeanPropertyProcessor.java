@@ -1,10 +1,10 @@
 package com.github.houbb.ioc.support.lifecycle.property.impl;
 
 import com.github.houbb.heaven.annotation.ThreadSafe;
+import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
 import com.github.houbb.ioc.support.lifecycle.property.SingleBeanPropertyProcessor;
-import com.github.houbb.ioc.utils.MethodUtils;
 
 /**
  * 对象属性设置类。
@@ -35,7 +35,7 @@ class RefBeanPropertyProcessor implements SingleBeanPropertyProcessor {
         final String refStr = propertyArgDefinition.getRef();
 
         Object ref = beanFactory.getBean(refStr);
-        MethodUtils.invokeSetterMethod(instance, propertyArgDefinition.getName(), ref);
+        ReflectMethodUtil.invokeSetterMethod(instance, propertyArgDefinition.getName(), ref);
     }
 
 }
