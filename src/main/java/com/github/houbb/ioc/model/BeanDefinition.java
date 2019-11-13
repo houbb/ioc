@@ -7,7 +7,7 @@ import java.util.List;
  * @author binbin.hou
  * @since 0.0.1
  */
-public interface BeanDefinition {
+public interface BeanDefinition extends Cloneable {
 
     /**
      * 名称
@@ -134,5 +134,40 @@ public interface BeanDefinition {
      * @since 0.0.7
      */
     void setPropertyArgList(final List<PropertyArgDefinition> propertyArgList);
+
+    /**
+     * 是否为抽象类
+     * @return 是否
+     * @since 0.0.9
+     */
+    boolean isAbstractClass();
+
+    /**
+     * 设置是否为抽象类
+     * @param abstractClass 是否
+     * @since 0.0.9
+     */
+    void setAbstractClass(boolean abstractClass);
+
+    /**
+     * 获取父类名称
+     * @return 父类名称
+     * @since 0.0.9
+     */
+    String getParentName();
+
+    /**
+     * 设置父类名称
+     * @param parentName 父类名称
+     * @since 0.0.9
+     */
+    void setParentName(String parentName);
+
+    /**
+     * 直接复制一份信息
+     * @return 结果
+     * @since 0.0.9
+     */
+    BeanDefinition clone();
 
 }

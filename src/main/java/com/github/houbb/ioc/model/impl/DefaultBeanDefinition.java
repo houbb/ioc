@@ -1,5 +1,6 @@
 package com.github.houbb.ioc.model.impl;
 
+import com.github.houbb.bean.mapping.core.util.BeanUtil;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
@@ -66,6 +67,20 @@ public class DefaultBeanDefinition implements BeanDefinition {
      * @since 0.0.7
      */
     private List<PropertyArgDefinition> propertyArgList;
+
+    /**
+     * 是否为抽象类
+     * （1）如果为抽象的时候，那么就不需要进行创建这个对象。
+     * （2）这个对象更多的是提供属性，暂时不支持使用。
+     * @since 0.0.9
+     */
+    private boolean abstractClass;
+
+    /**
+     * 父类名称
+     * @since 0.0.9
+     */
+    private String parentName;
 
     @Override
     public String getName() {
@@ -155,6 +170,33 @@ public class DefaultBeanDefinition implements BeanDefinition {
     @Override
     public void setPropertyArgList(List<PropertyArgDefinition> propertyArgList) {
         this.propertyArgList = propertyArgList;
+    }
+
+    @Override
+    public boolean isAbstractClass() {
+        return abstractClass;
+    }
+
+    @Override
+    public void setAbstractClass(boolean abstractClass) {
+        this.abstractClass = abstractClass;
+    }
+
+    @Override
+    public String getParentName() {
+        return parentName;
+    }
+
+    @Override
+    public void setParentName(String parentName) {
+        this.parentName = parentName;
+    }
+
+    @Override
+    public DefaultBeanDefinition clone() {
+        DefaultBeanDefinition definition = new DefaultBeanDefinition();
+        BeanUtil.copyProperties(this, definition);
+        return definition;
     }
 
 }

@@ -24,8 +24,8 @@
         <project.compiler.level>1.7</project.compiler.level>
 
         <!--============================== INTER ==============================-->
-        <heaven.version>0.1.40</heaven.version>
-        <json.version>0.1.5</json.version>
+        <json.version>0.1.8-SNAPSHOT</json.version>
+        <bean-mapping-core.version>0.2.1</bean-mapping-core.version>
 
         <!--============================== OTHER ==============================-->
         <junit.version>4.12</junit.version>
@@ -41,7 +41,11 @@
                 <artifactId>json</artifactId>
                 <version>${json.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.github.houbb</groupId>
+                <artifactId>bean-mapping-core</artifactId>
+                <version>${bean-mapping-core.version}</version>
+            </dependency>
 
             <!--============================== OTHER ==============================-->
             <dependency>
@@ -61,6 +65,11 @@
         <dependency>
             <groupId>com.github.houbb</groupId>
             <artifactId>json</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.houbb</groupId>
+            <artifactId>bean-mapping-core</artifactId>
         </dependency>
 
         <!--============================== OTHER ==============================-->
