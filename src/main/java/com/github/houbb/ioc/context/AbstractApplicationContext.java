@@ -12,6 +12,8 @@ import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
 import com.github.houbb.ioc.support.aware.ApplicationContextAware;
+import com.github.houbb.ioc.support.cycle.DependsCheckService;
+import com.github.houbb.ioc.support.cycle.impl.DefaultDependsCheckService;
 import com.github.houbb.ioc.support.processor.ApplicationContextPostProcessor;
 
 import java.util.HashMap;
@@ -71,9 +73,13 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
         // 允许用户自定义的部分。
         createAbleDefinitionList = this.postProcessor(createAbleDefinitionList);
 
-        // 基本属性的设置
+        // 注册所有的依赖检测
+        super.getDependsCheckService().registerBeanDefinitions(createAbleDefinitionList);
+
+        // 基本属性的设置注册
         this.registerBeanDefinitions(createAbleDefinitionList);
 
+        // 注册钩子函数
         this.registerShutdownHook();
 
         this.notifyAllAware();

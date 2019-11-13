@@ -21,6 +21,12 @@ public class ColorWeightApple {
      */
     private String color;
 
+    /**
+     * @since 0.1.0
+     */
+    public ColorWeightApple() {
+    }
+
     public ColorWeightApple(final ColorApple colorApple, Integer weight) {
         this.color = colorApple.getColor();
         this.weight = weight;

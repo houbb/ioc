@@ -7,7 +7,7 @@ import java.util.List;
  * @author binbin.hou
  * @since 0.0.1
  */
-public interface BeanDefinition extends Cloneable {
+public interface BeanDefinition {
 
     /**
      * 名称
@@ -162,12 +162,5 @@ public interface BeanDefinition extends Cloneable {
      * @since 0.0.9
      */
     void setParentName(String parentName);
-
-    /**
-     * 直接复制一份信息
-     * @return 结果
-     * @since 0.0.9
-     */
-    BeanDefinition clone();
 
 }

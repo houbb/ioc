@@ -16,6 +16,8 @@ import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.support.aware.BeanCreateAware;
 import com.github.houbb.ioc.support.aware.BeanNameAware;
+import com.github.houbb.ioc.support.cycle.DependsCheckService;
+import com.github.houbb.ioc.support.cycle.impl.DefaultDependsCheckService;
 import com.github.houbb.ioc.support.lifecycle.DisposableBean;
 import com.github.houbb.ioc.support.lifecycle.InitializingBean;
 import com.github.houbb.ioc.support.lifecycle.create.DefaultNewInstanceBean;
@@ -60,6 +62,12 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     private List<Pair<Object, BeanDefinition>> instanceBeanDefinitionList = new ArrayList<>();
 
     /**
+     * 依赖检测服务
+     * @since 0.1.0
+     */
+    private DependsCheckService dependsCheckService = new DefaultDependsCheckService();
+
+    /**
      * 注册对象定义信息
      * @param beanName 属性信息
      * @param beanDefinition 对象定义
@@ -81,6 +89,15 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         if(needEagerCreateSingleton(beanDefinition)) {
             this.registerSingletonBean(beanName, beanDefinition);
         }
+    }
+
+    /**
+     * 获取依赖检测服务
+     * @return 服务实现
+     * @since 0.1.0
+     */
+    protected DependsCheckService getDependsCheckService() {
+        return this.dependsCheckService;
     }
 
     /**
@@ -275,6 +292,12 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     private Object createBean(final BeanDefinition beanDefinition) {
         //1. 初始化相关处理
         final String beanName = beanDefinition.getName();
+        //1.1 检测是否存在循环依赖
+        if(dependsCheckService.isCircleRef(beanName)) {
+            throw new IocRuntimeException(beanName + " has circle reference.");
+        }
+
+        //1.2 创建实例信息
         Object instance = DefaultNewInstanceBean.getInstance()
                 .newInstance(this, beanDefinition);
 

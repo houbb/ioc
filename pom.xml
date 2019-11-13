@@ -6,7 +6,7 @@
 
     <groupId>com.github.houbb</groupId>
     <artifactId>ioc</artifactId>
-    <version>0.0.9-SNAPSHOT</version>
+    <version>0.1.0</version>
 
     <properties>
         <!--============================== All Plugins START ==============================-->
@@ -25,7 +25,6 @@
 
         <!--============================== INTER ==============================-->
         <json.version>0.1.8</json.version>
-        <bean-mapping-core.version>0.2.1</bean-mapping-core.version>
 
         <!--============================== OTHER ==============================-->
         <junit.version>4.12</junit.version>
@@ -40,17 +39,6 @@
                 <groupId>com.github.houbb</groupId>
                 <artifactId>json</artifactId>
                 <version>${json.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.houbb</groupId>
-                <artifactId>bean-mapping-core</artifactId>
-                <version>${bean-mapping-core.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.github.houbb</groupId>
-                        <artifactId>heaven</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!--============================== OTHER ==============================-->
@@ -71,11 +59,6 @@
         <dependency>
             <groupId>com.github.houbb</groupId>
             <artifactId>json</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.houbb</groupId>
-            <artifactId>bean-mapping-core</artifactId>
         </dependency>
 
         <!--============================== OTHER ==============================-->

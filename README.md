@@ -97,6 +97,8 @@ Apple color: red.
 
 [v0.0.9-Parent 属性继承](https://github.com/houbb/ioc/tree/release_0.0.9)
 
+[v0.1.0-循环依赖检测](https://github.com/houbb/ioc/tree/release_0.1.0)
+
 # 拓展阅读
 
 [Java IOC-00-ioc 是什么](https://houbb.github.io/2019/11/06/java-ioc-01-overview)

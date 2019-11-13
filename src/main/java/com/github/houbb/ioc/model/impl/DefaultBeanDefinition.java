@@ -1,6 +1,5 @@
 package com.github.houbb.ioc.model.impl;
 
-import com.github.houbb.bean.mapping.core.util.BeanUtil;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
@@ -190,13 +189,6 @@ public class DefaultBeanDefinition implements BeanDefinition {
     @Override
     public void setParentName(String parentName) {
         this.parentName = parentName;
-    }
-
-    @Override
-    public DefaultBeanDefinition clone() {
-        DefaultBeanDefinition definition = new DefaultBeanDefinition();
-        BeanUtil.copyProperties(this, definition);
-        return definition;
     }
 
 }
