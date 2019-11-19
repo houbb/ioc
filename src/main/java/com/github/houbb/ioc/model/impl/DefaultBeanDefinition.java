@@ -81,6 +81,15 @@ public class DefaultBeanDefinition implements BeanDefinition {
      */
     private String parentName;
 
+    /**
+     * 新建对象实例
+     * @return 对象实例
+     * @since 0.1.1
+     */
+    public static DefaultBeanDefinition newInstance() {
+        return new DefaultBeanDefinition();
+    }
+
     @Override
     public String getName() {
         return name;
