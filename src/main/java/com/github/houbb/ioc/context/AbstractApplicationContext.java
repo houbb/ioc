@@ -12,12 +12,8 @@ import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
 import com.github.houbb.ioc.support.aware.ApplicationContextAware;
-import com.github.houbb.ioc.support.cycle.DependsCheckService;
-import com.github.houbb.ioc.support.cycle.impl.DefaultDependsCheckService;
 import com.github.houbb.ioc.support.processor.ApplicationContextPostProcessor;
 
-import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
