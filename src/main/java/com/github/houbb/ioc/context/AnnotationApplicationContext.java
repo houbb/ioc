@@ -13,6 +13,8 @@ import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.impl.DefaultAnnotationBeanDefinition;
+import com.github.houbb.ioc.support.annotation.Lazys;
+import com.github.houbb.ioc.support.annotation.Scopes;
 import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
 
@@ -96,8 +98,8 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
 
         AnnotationBeanDefinition beanDefinition = new DefaultAnnotationBeanDefinition();
         beanDefinition.setClassName(clazz.getName());
-        beanDefinition.setLazyInit(false);
-        beanDefinition.setScope(ScopeEnum.SINGLETON.getCode());
+        beanDefinition.setLazyInit(Lazys.getLazy(clazz));
+        beanDefinition.setScope(Scopes.getScope(clazz));
         beanDefinition.setBeanSourceType(BeanSourceTypeEnum.CONFIGURATION);
         if(StringUtil.isEmpty(beanName)) {
             beanName = beanNameStrategy.generateBeanName(beanDefinition);
@@ -148,11 +150,10 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
                 beanDefinition.setBeanSourceType(BeanSourceTypeEnum.CONFIGURATION_BEAN);
                 beanDefinition.setConfigurationName(configuration.getName());
                 beanDefinition.setConfigurationBeanMethod(methodName);
-
+                beanDefinition.setLazyInit(Lazys.getLazy(method));
+                beanDefinition.setScope(Scopes.getScope(method));
                 // 这里后期需要添加 property/constructor 对应的实现
-                beanDefinition.setLazyInit(false);
-                beanDefinition.setScope(ScopeEnum.SINGLETON.getCode());
-
+                // 甚至包含 autowired 对应的处理，可以独立于其他配置之外。
                 resultList.add(beanDefinition);
             }
         }

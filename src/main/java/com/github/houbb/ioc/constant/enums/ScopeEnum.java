@@ -1,5 +1,7 @@
 package com.github.houbb.ioc.constant.enums;
 
+import com.github.houbb.ioc.constant.ScopeConst;
+
 /**
  * <p> project: ioc-ScopeEnum </p>
  * <p> create on 2019/11/8 20:19 </p>
@@ -12,12 +14,13 @@ public enum ScopeEnum {
      * 单例
      * @since 0.0.3
      */
-    SINGLETON("singleton"),
+    SINGLETON(ScopeConst.SINGLETON),
 
     /**
      * 多例
+     * @since 0.0.3
      */
-    PROTOTYPE("prototype"),
+    PROTOTYPE(ScopeConst.PROTOTYPE),
     ;
 
     /**

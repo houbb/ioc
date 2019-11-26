@@ -99,6 +99,12 @@ Apple color: red.
 
 [v0.1.0-循环依赖检测](https://github.com/houbb/ioc/tree/release_0.1.0)
 
+[v0.1.1-@Configuration](https://github.com/houbb/ioc/tree/release_0.1.1)
+
+[v0.1.2-@Bean](https://github.com/houbb/ioc/tree/release_0.1.2)
+
+[v0.1.3-@Lazy-@Scope](https://github.com/houbb/ioc/tree/release_0.1.3)
+
 # 拓展阅读
 
 [Java IOC-00-ioc 是什么](https://houbb.github.io/2019/11/06/java-ioc-01-overview)

@@ -1,5 +1,7 @@
 package com.github.houbb.ioc.annotation;
 
+import com.github.houbb.ioc.constant.ScopeConst;
+
 import java.lang.annotation.*;
 
 /**
@@ -17,7 +19,8 @@ public @interface Scope {
      * 生命周期指定
      * @return 生命周期指定
      * @since 0.1.3
+     * @see ScopeConst 常量
      */
-    String value() default "singleton";
+    String value() default ScopeConst.SINGLETON;
 
 }
