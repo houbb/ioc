@@ -1,5 +1,6 @@
 package com.github.houbb.ioc.model.impl;
 
+import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
@@ -80,6 +81,12 @@ public class DefaultBeanDefinition implements BeanDefinition {
      * @since 0.0.9
      */
     private String parentName;
+
+    /**
+     * 对象数据来源
+     * @since 0.1.2
+     */
+    private BeanSourceTypeEnum beanSourceType;
 
     /**
      * 新建对象实例
@@ -200,5 +207,14 @@ public class DefaultBeanDefinition implements BeanDefinition {
         this.parentName = parentName;
     }
 
+    @Override
+    public BeanSourceTypeEnum getBeanSourceType() {
+        return beanSourceType;
+    }
+
+    @Override
+    public void setBeanSourceType(BeanSourceTypeEnum beanSourceType) {
+        this.beanSourceType = beanSourceType;
+    }
 }
 

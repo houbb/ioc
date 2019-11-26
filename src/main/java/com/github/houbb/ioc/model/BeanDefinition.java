@@ -1,5 +1,7 @@
 package com.github.houbb.ioc.model;
 
+import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
+
 import java.util.List;
 
 /**
@@ -162,5 +164,19 @@ public interface BeanDefinition {
      * @since 0.0.9
      */
     void setParentName(String parentName);
+
+    /**
+     * 设置对象数据来源
+     * @param beanSourceType 对象数据来源
+     * @since 0.1.2
+     */
+    void setBeanSourceType(final BeanSourceTypeEnum beanSourceType);
+
+    /**
+     * 获取对象数据来源
+     * @return 数据来源
+     * @since 0.1.2
+     */
+    BeanSourceTypeEnum getBeanSourceType();
 
 }

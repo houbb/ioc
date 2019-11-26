@@ -3,22 +3,21 @@ package com.github.houbb.ioc.context;
 import com.github.houbb.heaven.support.instance.impl.Instances;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
-import com.github.houbb.heaven.util.io.FileUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
-import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
+import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.annotation.Bean;
 import com.github.houbb.ioc.annotation.Configuration;
+import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
+import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
-import com.github.houbb.ioc.model.impl.DefaultBeanDefinition;
+import com.github.houbb.ioc.model.impl.DefaultAnnotationBeanDefinition;
 import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
-import com.github.houbb.json.bs.JsonBs;
-import com.sun.org.apache.xpath.internal.Arg;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -65,28 +64,47 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
      */
     @Override
     protected List<BeanDefinition> buildBeanDefinitionList() {
-        List<BeanDefinition> beanDefinitionList = Guavas.newArrayList();
+        List<BeanDefinition> resultList = Guavas.newArrayList();
 
         for(Class clazz : configClasses) {
-            if(clazz.isAnnotationPresent(Configuration.class)) {
-                Configuration configuration = (Configuration) clazz.getAnnotation(Configuration.class);
-                String beanName = configuration.value();
+            Optional<AnnotationBeanDefinition> configurationOpt = buildConfigurationBeanDefinition(clazz);
+            if(configurationOpt.isPresent()) {
+                BeanDefinition configuration = configurationOpt.get();
+                resultList.add(configuration);
 
-                BeanDefinition beanDefinition = DefaultBeanDefinition.newInstance();
-                beanDefinition.setClassName(clazz.getName());
-                beanDefinition.setLazyInit(false);
-                beanDefinition.setScope(ScopeEnum.SINGLETON.getCode());
-                if(StringUtil.isEmpty(beanName)) {
-                    beanName = beanNameStrategy.generateBeanName(beanDefinition);
-                }
-                beanDefinition.setName(beanName);
-
-                // 构建 beanList
-                beanDefinitionList.add(beanDefinition);
+                List<AnnotationBeanDefinition> beanDefinitions = buildBeanAnnotationList(configuration, clazz);
+                resultList.addAll(beanDefinitions);
             }
         }
 
-        return beanDefinitionList;
+        return resultList;
+    }
+
+    /**
+     * 构建配置对象定义
+     * @param clazz 类信息
+     * @return 属性定义
+     * @since 0.1.2
+     */
+    private Optional<AnnotationBeanDefinition> buildConfigurationBeanDefinition(final Class clazz) {
+        if(!clazz.isAnnotationPresent(Configuration.class)) {
+            return Optional.empty();
+        }
+
+        Configuration configuration = (Configuration) clazz.getAnnotation(Configuration.class);
+        String beanName = configuration.value();
+
+        AnnotationBeanDefinition beanDefinition = new DefaultAnnotationBeanDefinition();
+        beanDefinition.setClassName(clazz.getName());
+        beanDefinition.setLazyInit(false);
+        beanDefinition.setScope(ScopeEnum.SINGLETON.getCode());
+        beanDefinition.setBeanSourceType(BeanSourceTypeEnum.CONFIGURATION);
+        if(StringUtil.isEmpty(beanName)) {
+            beanName = beanNameStrategy.generateBeanName(beanDefinition);
+        }
+        beanDefinition.setName(beanName);
+
+        return Optional.of(beanDefinition);
     }
 
     /**
@@ -98,29 +116,47 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
      * （3）beanName 应该怎么获取？根据 methodName（这个） 还是根据 className？
      * 这个逻辑可以放在 {@link BeanNameStrategy} 中，保证逻辑的统一性。
      *
+     * @param configuration 对象配置定义信息
      * @param clazz 类型信息
      * @return 结果列表
      * @since 0.1.2
      */
-    private List<BeanDefinition> buildBeanAnnotationList(final Class clazz) {
+    private List<AnnotationBeanDefinition> buildBeanAnnotationList(final BeanDefinition configuration, final Class clazz) {
         ArgUtil.notNull(clazz, "clazz");
+        if(!clazz.isAnnotationPresent(Configuration.class)) {
+            return Collections.emptyList();
+        }
 
-        List<BeanDefinition> beanDefinitionList = Guavas.newArrayList();
-
+        List<AnnotationBeanDefinition> resultList = Guavas.newArrayList();
         List<Method> methodList = ClassUtil.getMethodList(clazz);
         for(Method method : methodList) {
             if(method.isAnnotationPresent(Bean.class)) {
+                Bean bean = method.getAnnotation(Bean.class);
                 String methodName = method.getName();
                 Class<?> returnType = method.getReturnType();
-
-                Bean bean = method.getAnnotation(Bean.class);
                 String beanName = bean.value();
                 if(StringUtil.isEmpty(beanName)) {
                     beanName = methodName;
                 }
+
+                AnnotationBeanDefinition beanDefinition = new DefaultAnnotationBeanDefinition();
+                beanDefinition.setName(beanName);
+                beanDefinition.setClassName(returnType.getName());
+                beanDefinition.setInitialize(bean.initMethod());
+                beanDefinition.setDestroy(bean.destroyMethod());
+                // 如何获取这个实例，反倒是可以直接通过方法调用。
+                beanDefinition.setBeanSourceType(BeanSourceTypeEnum.CONFIGURATION_BEAN);
+                beanDefinition.setConfigurationName(configuration.getName());
+                beanDefinition.setConfigurationBeanMethod(methodName);
+
+                // 这里后期需要添加 property/constructor 对应的实现
+                beanDefinition.setLazyInit(false);
+                beanDefinition.setScope(ScopeEnum.SINGLETON.getCode());
+
+                resultList.add(beanDefinition);
             }
         }
-        return beanDefinitionList;
+        return resultList;
     }
 
 }
