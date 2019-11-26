@@ -5,9 +5,11 @@ import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.annotation.Bean;
 import com.github.houbb.ioc.annotation.Configuration;
+import com.github.houbb.ioc.annotation.Import;
 import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
@@ -19,8 +21,10 @@ import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 注解应用上下文
@@ -68,7 +72,8 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
     protected List<BeanDefinition> buildBeanDefinitionList() {
         List<BeanDefinition> resultList = Guavas.newArrayList();
 
-        for(Class clazz : configClasses) {
+        final List<Class> configList = getConfigClassList();
+        for(Class clazz : configList) {
             Optional<AnnotationBeanDefinition> configurationOpt = buildConfigurationBeanDefinition(clazz);
             if(configurationOpt.isPresent()) {
                 BeanDefinition configuration = configurationOpt.get();
@@ -80,6 +85,48 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
         }
 
         return resultList;
+    }
+
+    /**
+     * 获取配置类列表信息
+     * （1）这里首先需要进行一层过滤，避免重复导入。
+     * （2）这里需要递归处理，处理 class 头上的 {@link com.github.houbb.ioc.annotation.Import} 配置信息。
+     *
+     * @return 配置类列表
+     * @since 0.1.4
+     */
+    private List<Class> getConfigClassList() {
+        Set<Class> configSet = Guavas.newHashSet(this.configClasses.length);
+
+        for(Class configClass : configClasses) {
+            addAllImportClass(configSet, configClass);
+        }
+
+        return Guavas.newArrayList(configSet);
+    }
+
+    /**
+     * 添加所有导入配置信息
+     * @param configSet 配置集合
+     * @param configClass 配置类
+     * @since 0.1.4
+     */
+    private void addAllImportClass(final Set<Class> configSet, final Class configClass) {
+        configSet.add(configClass);
+
+        if(configClass.isAnnotationPresent(Import.class)) {
+            Import importInfo = (Import) configClass.getAnnotation(Import.class);
+
+            Class[] importClasses = importInfo.value();
+            if(ArrayUtil.isNotEmpty(importClasses)) {
+                for(Class importClass : importClasses) {
+                    //1. 循环添加
+                    configSet.add(importClass);
+                    //2. 递归处理
+                    addAllImportClass(configSet, importClass);
+                }
+            }
+        }
     }
 
     /**

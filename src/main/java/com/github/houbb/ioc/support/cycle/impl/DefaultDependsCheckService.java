@@ -6,6 +6,8 @@ import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
+import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
+import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
@@ -81,12 +83,19 @@ public class DefaultDependsCheckService implements DependsCheckService {
      * 获取对象的所有依赖信息
      * （1）构造器依赖 {@link ConstructorArgDefinition#getRef()}
      * （2）属性值依赖 {@link PropertyArgDefinition#getRef()}
+     * （3）如果是 config-bean，则 config 首先就是 bean 对应的依赖。 @since 0.1.4
      * @param beanDefinition 对象定义
      * @return 依赖结果名称
      * @since 0.1.0
      */
     private Set<String> getDependsOnSet(final BeanDefinition beanDefinition) {
         Set<String> dependsSet = Guavas.newHashSet();
+
+        final BeanSourceTypeEnum sourceType = beanDefinition.getBeanSourceType();
+        if(BeanSourceTypeEnum.CONFIGURATION_BEAN.equals(sourceType)) {
+            AnnotationBeanDefinition annotationBeanDefinition = (AnnotationBeanDefinition)beanDefinition;
+            dependsSet.add(annotationBeanDefinition.getConfigurationName());
+        }
 
         List<ConstructorArgDefinition> constructorArgDefinitions = beanDefinition.getConstructorArgList();
         if(CollectionUtil.isNotEmpty(constructorArgDefinitions)) {
