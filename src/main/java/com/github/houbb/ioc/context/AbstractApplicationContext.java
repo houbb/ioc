@@ -4,11 +4,15 @@ import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
+import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.heaven.util.util.MapUtil;
+import com.github.houbb.heaven.util.util.SetUtil;
+import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.impl.DefaultListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
+import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
 import com.github.houbb.ioc.support.aware.ApplicationContextAware;
@@ -16,6 +20,7 @@ import com.github.houbb.ioc.support.processor.ApplicationContextPostProcessor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p> project: ioc-AbstractApplicationContext </p>
@@ -56,6 +61,13 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
     }
 
     /**
+     * 构建 bean 属性定义列表
+     * @return 属性定义列表
+     * @since 0.0.4
+     */
+    protected abstract List<BeanDefinition> buildBeanDefinitionList();
+
+    /**
      * 初始上下文
      * @since 0.0.9
      */
@@ -79,6 +91,43 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
         this.registerShutdownHook();
 
         this.notifyAllAware();
+    }
+
+    /**
+     * 注册对象属性列表
+     * @param beanDefinitionList 对象属性列表
+     * @since 0.0.4
+     */
+    private void registerBeanDefinitions(final List<BeanDefinition> beanDefinitionList) {
+        if(CollectionUtil.isNotEmpty(beanDefinitionList)) {
+            // 首先保证基本信息注册完成
+            for (BeanDefinition beanDefinition : beanDefinitionList) {
+                // 填充默认值
+                this.fillDefaultValue(beanDefinition);
+
+                super.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
+            }
+
+            // 初始化 eager 单例对象 @since 0.1.5
+            // 调整顺序，避免信息未加载完成
+            for(BeanDefinition beanDefinition : beanDefinitionList) {
+                super.createEagerSingleton(beanDefinition);
+            }
+        }
+    }
+
+    /**
+     * 填充默认值信息
+     *（1）默认设置为单例
+     *
+     * @param beanDefinition 对象属性定义
+     * @since 0.0.4
+     */
+    private void fillDefaultValue(BeanDefinition beanDefinition) {
+        String scope = beanDefinition.getScope();
+        if(StringUtil.isEmpty(scope)) {
+            beanDefinition.setScope(ScopeEnum.SINGLETON.getCode());
+        }
     }
 
     /**
@@ -210,40 +259,6 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
         }
     }
 
-    /**
-     * 构建 bean 属性定义列表
-     * @return 属性定义列表
-     * @since 0.0.4
-     */
-    protected abstract List<BeanDefinition> buildBeanDefinitionList();
-
-    /**
-     * 注册对象属性列表
-     * @param beanDefinitionList 对象属性列表
-     * @since 0.0.4
-     */
-    protected void registerBeanDefinitions(final List<BeanDefinition> beanDefinitionList) {
-        if(CollectionUtil.isNotEmpty(beanDefinitionList)) {
-            for (BeanDefinition beanDefinition : beanDefinitionList) {
-                // 填充默认值
-                this.fillDefaultValue(beanDefinition);
-
-                super.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
-            }
-        }
-    }
-
-    /**
-     * 填充默认值信息
-     * @param beanDefinition 对象属性定义
-     * @since 0.0.4
-     */
-    private void fillDefaultValue(BeanDefinition beanDefinition) {
-        String scope = beanDefinition.getScope();
-        if(StringUtil.isEmpty(scope)) {
-            beanDefinition.setScope(ScopeEnum.SINGLETON.getCode());
-        }
-    }
 
     /**
      * 注册关闭钩子函数

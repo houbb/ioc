@@ -6,6 +6,7 @@ import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.model.impl.DefaultBeanDefinition;
 import com.github.houbb.ioc.model.impl.DefaultConstructorArgDefinition;
 import com.github.houbb.json.bs.JsonBs;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -22,6 +23,7 @@ public class GenJsonTest {
      * @since 0.0.1
      */
     @Test
+    @Ignore
     public void genAppleJsonTest() {
         List<BeanDefinition> beanDefinitions = Guavas.newArrayList();
         BeanDefinition weightApple = new DefaultBeanDefinition();

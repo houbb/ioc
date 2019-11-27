@@ -25,4 +25,14 @@ public enum BeanSourceTypeEnum {
      */
     CONFIGURATION_BEAN;
 
+    /**
+     * 是否为配置对象
+     * @param sourceTypeEnum 数据类型枚举
+     * @return 结果
+     * @since 0.1.5
+     */
+    public static boolean isConfigurationBean(final BeanSourceTypeEnum sourceTypeEnum) {
+        return CONFIGURATION_BEAN.equals(sourceTypeEnum);
+    }
+
 }

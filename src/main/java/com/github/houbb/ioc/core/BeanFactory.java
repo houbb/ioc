@@ -1,5 +1,7 @@
 package com.github.houbb.ioc.core;
 
+import java.util.Set;
+
 /**
  * bean 工厂接口
  * @author binbin.hou
@@ -52,5 +54,13 @@ public interface BeanFactory {
      * @see #getBean(String) 对应的类型
      */
     Class<?> getType(final String beanName);
+
+    /**
+     * 根据类型获取对应的 bean 名称列表
+     * @param requiredType 类型
+     * @return 对应的列表
+     * @since 0.1.5
+     */
+    Set<String> getBeanNames(final Class requiredType);
 
 }

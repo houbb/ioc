@@ -9,6 +9,7 @@ import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
+import com.github.houbb.ioc.annotation.Bean;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
@@ -84,8 +85,16 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
         //2.1 添加监听器
         this.notifyAllBeanNameAware(beanName);
+    }
 
-        //3. 初始化 bean 信息
+    /**
+     * 创建需要创建的单例对象
+     * @param beanDefinition 对象定义
+     * @since 0.1.5
+     */
+    protected void createEagerSingleton(final BeanDefinition beanDefinition) {
+        //3. 初始化 bean 信息-这里应该统一放在最后进行初始化。
+        final String beanName = beanDefinition.getName();
         if(needEagerCreateSingleton(beanDefinition)) {
             this.registerSingletonBean(beanName, beanDefinition);
         }
@@ -192,9 +201,10 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * 根据类型获取对应的属性名称
      * @param requiredType 需求类型
      * @return bean 名称列表
-     * @since 0.0.2
+     * @since 0.0.2 初始化
+     * @since 0.1.5 设置为公开方法
      */
-    protected Set<String> getBeanNames(final Class requiredType) {
+    public Set<String> getBeanNames(final Class requiredType) {
         ArgUtil.notNull(requiredType, "requiredType");
         return typeBeanNameMap.get(requiredType);
     }

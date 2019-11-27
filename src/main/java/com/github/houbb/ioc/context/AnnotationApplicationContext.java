@@ -5,6 +5,7 @@ import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.annotation.Bean;
@@ -197,6 +198,9 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
                 beanDefinition.setBeanSourceType(BeanSourceTypeEnum.CONFIGURATION_BEAN);
                 beanDefinition.setConfigurationName(configuration.getName());
                 beanDefinition.setConfigurationBeanMethod(methodName);
+                beanDefinition.setConfigBeanMethodParamTypes(method.getParameterTypes());
+                beanDefinition.setConfigBeanMethodParamRefs(ReflectMethodUtil.getParamNames(method));
+
                 beanDefinition.setLazyInit(Lazys.getLazy(method));
                 beanDefinition.setScope(Scopes.getScope(method));
                 // 这里后期需要添加 property/constructor 对应的实现

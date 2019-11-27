@@ -107,6 +107,8 @@ Apple color: red.
 
 [v0.1.4-@Import 配置导入](https://github.com/houbb/ioc/tree/release_0.1.4)
 
+[v0.1.5-@Bean 参数构造以及 @Description](https://github.com/houbb/ioc/tree/release_0.1.5)
+
 # 拓展阅读
 
 [Java IOC-00-ioc 是什么](https://houbb.github.io/2019/11/06/java-ioc-01-overview)

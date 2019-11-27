@@ -12,6 +12,7 @@ import com.github.houbb.ioc.model.impl.DefaultPropertyArgDefinition;
 import com.github.houbb.ioc.test.model.User;
 import com.github.houbb.ioc.test.service.Apple;
 import com.github.houbb.json.bs.JsonBs;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -28,6 +29,7 @@ public class BeanPropertyTest {
      * @since 0.0.6
      */
     @Test
+    @Ignore
     public void genUserJsonTest() {
         List<BeanDefinition> beanDefinitions = Guavas.newArrayList();
         BeanDefinition book = new DefaultBeanDefinition();

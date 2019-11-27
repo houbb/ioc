@@ -1,5 +1,7 @@
 package com.github.houbb.ioc.model;
 
+import java.util.List;
+
 /**
  * 注解对象定义属性
  * @author binbin.hou
@@ -35,5 +37,31 @@ public interface AnnotationBeanDefinition extends BeanDefinition {
      * @since 0.1.2
      */
     String getConfigurationBeanMethod();
+
+    /**
+     * 设置对象方法参数类型列表
+     * @param classes 参数类型列表
+     * @since 0.1.5
+     */
+    void setConfigBeanMethodParamTypes(final Class[] classes);
+
+    /**
+     * 获取对象方法参数类型列表
+     * @since 0.1.5
+     */
+    Class[] getConfigBeanMethodParamTypes();
+
+    /**
+     * 设置参数依赖的对象列表
+     * @param refs 依赖对象
+     * @since 0.1.5
+     */
+    void setConfigBeanMethodParamRefs(final List<String> refs);
+
+    /**
+     * 获取参数依赖的对象列表
+     * @since 0.1.5
+     */
+    List<String> getConfigBeanMethodParamRefs();
 
 }

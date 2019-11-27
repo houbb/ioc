@@ -3,7 +3,9 @@ package com.github.houbb.ioc.test.context;
 import com.github.houbb.ioc.context.AnnotationApplicationContext;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.test.config.AppBeanConfig;
+import com.github.houbb.ioc.test.config.AppBeanRefConfig;
 import com.github.houbb.ioc.test.config.AppConfig;
+import com.github.houbb.ioc.test.model.User;
 import com.github.houbb.ioc.test.service.Apple;
 import com.github.houbb.ioc.test.service.WeightApple;
 import org.junit.Assert;
@@ -28,6 +30,18 @@ public class ConfigBeanApplicationContextTest {
         WeightApple apple = beanFactory.getBean("weightApple", WeightApple.class);
 
         Assert.assertEquals("10", apple.getWeight());
+    }
+
+    /**
+     * 对象引用其他对象测试
+     * @since 0.1.5
+     */
+    @Test
+    public void beanRefTest() {
+        BeanFactory beanFactory = new AnnotationApplicationContext(AppBeanRefConfig.class);
+        User user = beanFactory.getBean("user", User.class);
+
+        Assert.assertEquals("User{book=Book{name='《海底两万里》'}, name='Hello'}", user.toString());
     }
 
 }

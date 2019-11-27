@@ -84,6 +84,8 @@ public class DefaultDependsCheckService implements DependsCheckService {
      * （1）构造器依赖 {@link ConstructorArgDefinition#getRef()}
      * （2）属性值依赖 {@link PropertyArgDefinition#getRef()}
      * （3）如果是 config-bean，则 config 首先就是 bean 对应的依赖。 @since 0.1.4
+     *  {@link AnnotationBeanDefinition#getConfigBeanMethodParamRefs()} @since 0.1.5
+     *
      * @param beanDefinition 对象定义
      * @return 依赖结果名称
      * @since 0.1.0
@@ -95,6 +97,9 @@ public class DefaultDependsCheckService implements DependsCheckService {
         if(BeanSourceTypeEnum.CONFIGURATION_BEAN.equals(sourceType)) {
             AnnotationBeanDefinition annotationBeanDefinition = (AnnotationBeanDefinition)beanDefinition;
             dependsSet.add(annotationBeanDefinition.getConfigurationName());
+
+            // 方法参数
+            dependsSet.addAll(annotationBeanDefinition.getConfigBeanMethodParamRefs());
         }
 
         List<ConstructorArgDefinition> constructorArgDefinitions = beanDefinition.getConstructorArgList();
