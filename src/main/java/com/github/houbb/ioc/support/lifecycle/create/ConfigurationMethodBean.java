@@ -130,6 +130,8 @@ class ConfigurationMethodBean extends AbstractNewInstanceBean {
                         // 此时不关注是否正确。
                         String paramName = paramRefs.get(i);
                         if(StringUtil.isEmpty(paramName)) {
+                            // 此时处理 @Primary 对应的情况
+
                             throw new IocRuntimeException(beanName + " configuration method param of ["+i+"] must be unique!");
                         }
                     }

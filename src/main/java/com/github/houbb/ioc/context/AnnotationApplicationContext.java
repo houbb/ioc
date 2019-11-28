@@ -62,6 +62,11 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
         this.beanNameStrategy = beanNameStrategy;
     }
 
+    @Override
+    protected <T> T getPrimaryBean(Class<T> requiredType) {
+        return super.getPrimaryBean(requiredType);
+    }
+
     /**
      * 构建对象属性列表
      * @return 对象属性列表

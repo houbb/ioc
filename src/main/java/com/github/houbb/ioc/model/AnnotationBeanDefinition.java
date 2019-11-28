@@ -66,4 +66,18 @@ public interface AnnotationBeanDefinition extends BeanDefinition {
      */
     List<String> getConfigBeanMethodParamRefs();
 
+    /**
+     * 是否为主要
+     * @return 是否为主要
+     * @since 0.1.7
+     */
+    boolean isPrimary();
+
+    /**
+     * 设置 primary
+     * @param primary 主要信息
+     * @since 0.1.7
+     */
+    void setPrimary(boolean primary);
+
 }

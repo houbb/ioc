@@ -35,6 +35,12 @@ public class DefaultAnnotationBeanDefinition extends DefaultBeanDefinition imple
      */
     private List<String> configBeanMethodParamRefs;
 
+    /**
+     * 是否为主要的对象
+     * @since 0.1.7
+     */
+    private boolean primary;
+
     @Override
     public String getConfigurationName() {
         return configurationName;
@@ -74,5 +80,16 @@ public class DefaultAnnotationBeanDefinition extends DefaultBeanDefinition imple
     public void setConfigBeanMethodParamRefs(List<String> configBeanMethodParamRefs) {
         this.configBeanMethodParamRefs = configBeanMethodParamRefs;
     }
+
+    @Override
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    @Override
+    public void setPrimary(boolean primary) {
+        this.primary = primary;
+    }
+
 }
 

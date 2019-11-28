@@ -75,6 +75,13 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     private DependsCheckService dependsCheckService = new DefaultDependsCheckService();
 
     /**
+     * 主要的对象名称 Map
+     * @see com.github.houbb.ioc.annotation.Primary 主键
+     * @since 0.1.7
+     */
+    private Map<Class, String> primaryBeanNameMap = Guavas.newHashMap();
+
+    /**
      * 注册对象定义信息
      *
      * @param beanName       属性信息
@@ -221,23 +228,6 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     protected Set<String> getBeanNames(final Class requiredType) {
         ArgUtil.notNull(requiredType, "requiredType");
         return typeBeanNameMap.get(requiredType);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected <T> T getRequiredTypeBean(Class<T> requiredType, String beanName) {
-        Set<String> beanNames = getBeanNames(requiredType);
-        if (CollectionUtil.isEmpty(beanNames)) {
-            throw new IocRuntimeException("RequiredType of " + requiredType.getName() + " beans not found!");
-        }
-        if (beanNames.size() == 1) {
-            final String firstBeanName = SetUtil.getFirst(beanNames);
-            return (T) getBean(firstBeanName);
-        }
-        if (StringUtil.isNotEmpty(beanName)) {
-            return (T) getBean(beanName);
-        }
-
-        throw new IocRuntimeException("RequiredType of " + requiredType.getName() + " must be unique!");
     }
 
     /**
