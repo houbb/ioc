@@ -11,6 +11,7 @@ import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.annotation.Bean;
 import com.github.houbb.ioc.annotation.Configuration;
 import com.github.houbb.ioc.annotation.Import;
+import com.github.houbb.ioc.annotation.Primary;
 import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
@@ -23,6 +24,7 @@ import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -46,6 +48,12 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
      */
     private BeanNameStrategy beanNameStrategy = Instances.singleton(DefaultBeanNameStrategy.class);
 
+    /**
+     * 主要类型映射 map
+     * @since 0.1.7
+     */
+    private Map<String, String> PRIMARY_TYPE_MAP = Guavas.newHashMap();
+
     public AnnotationApplicationContext(Class... configClasses) {
         ArgUtil.notEmpty(configClasses, "configClasses");
         this.configClasses = configClasses;
@@ -64,7 +72,13 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
 
     @Override
     protected <T> T getPrimaryBean(Class<T> requiredType) {
-        return super.getPrimaryBean(requiredType);
+        String typeName = requiredType.getName();
+        if(PRIMARY_TYPE_MAP.containsKey(typeName)) {
+            String beanName = PRIMARY_TYPE_MAP.get(typeName);
+            return super.getBean(beanName, requiredType);
+        }
+
+        return null;
     }
 
     /**
@@ -88,8 +102,18 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
             }
         }
 
+        // 注册 primary 对应的对象信息
+        for(BeanDefinition beanDefinition : resultList) {
+            AnnotationBeanDefinition annotationBeanDefinition = (AnnotationBeanDefinition)beanDefinition;
+            if(annotationBeanDefinition.isPrimary()) {
+                PRIMARY_TYPE_MAP.put(annotationBeanDefinition.getClassName(), annotationBeanDefinition.getName());
+            }
+        }
+
         return resultList;
     }
+
+
 
     /**
      * 获取配置类列表信息
@@ -157,6 +181,11 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
         }
         beanDefinition.setName(beanName);
 
+        // 指定为优先级类
+        if(clazz.isAnnotationPresent(Primary.class)) {
+            beanDefinition.setPrimary(true);
+        }
+
         return Optional.of(beanDefinition);
     }
 
@@ -206,8 +235,12 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
 
                 beanDefinition.setLazyInit(Lazys.getLazy(method));
                 beanDefinition.setScope(Scopes.getScope(method));
-                // 这里后期需要添加 property/constructor 对应的实现
-                // 甚至包含 autowired 对应的处理，可以独立于其他配置之外。
+
+                // 设置为优先
+                if(method.isAnnotationPresent(Primary.class)) {
+                    beanDefinition.setPrimary(true);
+                }
+
                 resultList.add(beanDefinition);
             }
         }

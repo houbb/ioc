@@ -5,7 +5,9 @@ import com.github.houbb.ioc.context.JsonApplicationContext;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.test.config.AppAutowiredCollectionConfig;
 import com.github.houbb.ioc.test.config.AppAutowiredConfig;
+import com.github.houbb.ioc.test.config.AppAutowiredPrimaryConfig;
 import com.github.houbb.ioc.test.config.AppConfig;
+import com.github.houbb.ioc.test.model.Book;
 import com.github.houbb.ioc.test.service.Apple;
 import org.junit.Assert;
 import org.junit.Test;
@@ -57,5 +59,19 @@ public class AnnotationApplicationContextTest {
         Assert.assertTrue(bookNames.contains("good"));
         Assert.assertTrue(bookNames.contains("bad"));
     }
+
+    /**
+     * 优先级测试
+     * @since 0.1.7
+     */
+    @Test
+    public void autowiredPrimaryTest() {
+        BeanFactory beanFactory = new AnnotationApplicationContext(AppAutowiredPrimaryConfig.class);
+        AppAutowiredPrimaryConfig appAutowiredPrimaryConfig = beanFactory.getBean("appAutowiredPrimaryConfig", AppAutowiredPrimaryConfig.class);
+
+        Book book = appAutowiredPrimaryConfig.getBook();
+        Assert.assertEquals("good", book.getName());
+    }
+
 
 }

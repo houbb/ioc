@@ -9,7 +9,6 @@ import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
-import com.github.houbb.heaven.util.util.SetUtil;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
@@ -73,13 +72,6 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * @since 0.1.0
      */
     private DependsCheckService dependsCheckService = new DefaultDependsCheckService();
-
-    /**
-     * 主要的对象名称 Map
-     * @see com.github.houbb.ioc.annotation.Primary 主键
-     * @since 0.1.7
-     */
-    private Map<Class, String> primaryBeanNameMap = Guavas.newHashMap();
 
     /**
      * 注册对象定义信息

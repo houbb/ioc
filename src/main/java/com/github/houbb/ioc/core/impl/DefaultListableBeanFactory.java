@@ -43,7 +43,7 @@ public class DefaultListableBeanFactory extends DefaultBeanFactory implements Li
             return (T) getBean(beanName);
         }
 
-        //1. 获取 @Primary 对应的信息，不为空则为空。
+        //1. 获取 @Primary 对应的信息，不为空则返回。
         T primary = getPrimaryBean(requiredType);
         if(ObjectUtil.isNotNull(primary)) {
             return primary;

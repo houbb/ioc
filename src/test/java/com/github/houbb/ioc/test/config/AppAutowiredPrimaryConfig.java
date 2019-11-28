@@ -3,30 +3,30 @@ package com.github.houbb.ioc.test.config;
 import com.github.houbb.ioc.annotation.Autowired;
 import com.github.houbb.ioc.annotation.Configuration;
 import com.github.houbb.ioc.annotation.Import;
+import com.github.houbb.ioc.test.model.Book;
 import com.github.houbb.ioc.test.service.WeightApple;
 
 /**
  * <p> project: ioc-AppConfig </p>
  * <p> create on 2019/11/19 23:01 </p>
  *
- * Autowired
  * @author Administrator
- * @since 0.1.6
+ * @since 0.1.7
  */
 @Configuration
-@Import(AppBeanConfig.class)
-public class AppAutowiredConfig {
+@Import(AppMultiBeanConfig.class)
+public class AppAutowiredPrimaryConfig {
 
     @Autowired
-    private WeightApple weightApple;
+    private Book book;
 
     /**
-     * 展示重量
-     * @since 0.1.6
-     * @return 重量
+     * 返回书籍
+     * @return 书籍
+     * @since 0.1.7
      */
-    public String getWeight() {
-        return weightApple.getWeight();
+    public Book getBook() {
+        return book;
     }
 
 }
