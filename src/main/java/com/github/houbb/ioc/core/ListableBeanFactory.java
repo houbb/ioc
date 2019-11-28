@@ -1,6 +1,7 @@
 package com.github.houbb.ioc.core;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * bean 工厂接口
@@ -19,5 +20,24 @@ public interface ListableBeanFactory extends BeanFactory {
      * @since 0.0.2
      */
     <T> List<T> getBeans(final Class<T> requiredType);
+
+    /**
+     * 根据类型获取对应的 bean 名称列表
+     * @param requiredType 类型
+     * @return 对应的列表
+     * @since 0.1.5
+     */
+    Set<String> getBeanNames(final Class requiredType);
+
+    /**
+     * 获取指定类型的对象
+     * @param requiredType 指定类型
+     * @param beanName 属性名称，可能为空
+     * @param <T> 泛型
+     * @return 结果
+     * @since 0.1.6
+     * @throws com.github.houbb.ioc.exception.IocRuntimeException 如果对应的信息不唯一
+     */
+    <T> T getRequiredTypeBean(final Class<T> requiredType, final String beanName);
 
 }

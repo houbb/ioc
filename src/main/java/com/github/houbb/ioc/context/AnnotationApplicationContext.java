@@ -12,7 +12,6 @@ import com.github.houbb.ioc.annotation.Bean;
 import com.github.houbb.ioc.annotation.Configuration;
 import com.github.houbb.ioc.annotation.Import;
 import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
-import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.impl.DefaultAnnotationBeanDefinition;
@@ -22,7 +21,6 @@ import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;

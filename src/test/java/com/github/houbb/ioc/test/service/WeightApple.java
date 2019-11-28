@@ -1,8 +1,5 @@
 package com.github.houbb.ioc.test.service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 /**
  * <p> project: ioc-Apple </p>
  * <p> create on 2019/11/6 20:02 </p>

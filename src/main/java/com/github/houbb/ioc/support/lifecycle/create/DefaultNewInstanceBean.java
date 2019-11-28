@@ -9,6 +9,7 @@ import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.support.lifecycle.NewInstanceBean;
 import com.github.houbb.ioc.support.lifecycle.property.impl.DefaultBeanPropertyProcessor;
 import com.github.houbb.ioc.support.processor.BeanPostProcessor;
+import com.github.houbb.ioc.support.processor.impl.AutowiredAnnotationBeanPostProcessor;
 
 import java.util.List;
 
@@ -56,8 +57,7 @@ public class DefaultNewInstanceBean implements NewInstanceBean {
 
         //2.1 通知 BeanPostProcessor
         final String beanName = beanDefinition.getName();
-        ListableBeanFactory listableBeanFactory = (ListableBeanFactory)beanFactory;
-        List<BeanPostProcessor> beanPostProcessorList = listableBeanFactory.getBeans(BeanPostProcessor.class);
+        List<BeanPostProcessor> beanPostProcessorList = getBeanPostProcessorList(beanFactory);
         for(BeanPostProcessor processor : beanPostProcessorList) {
             instance = processor.beforePropertySet(beanName, instance);
         }
@@ -71,6 +71,22 @@ public class DefaultNewInstanceBean implements NewInstanceBean {
 
         //4. 返回结果
         return instance;
+    }
+
+    /**
+     * 获取 {@link BeanPostProcessor} 对应的列表信息
+     * @param beanFactory 对象工厂
+     * @return 对象列表
+     * @since 0.1.6
+     */
+    private List<BeanPostProcessor> getBeanPostProcessorList(final BeanFactory beanFactory) {
+        ListableBeanFactory listableBeanFactory = (ListableBeanFactory)beanFactory;
+        List<BeanPostProcessor> beanPostProcessorList = listableBeanFactory.getBeans(BeanPostProcessor.class);
+
+        AutowiredAnnotationBeanPostProcessor beanPostProcessor = new AutowiredAnnotationBeanPostProcessor();
+        beanPostProcessor.setBeanFactory(listableBeanFactory);
+        beanPostProcessorList.add(beanPostProcessor);
+        return beanPostProcessorList;
     }
 
 }

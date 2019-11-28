@@ -9,7 +9,7 @@ import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
-import com.github.houbb.ioc.annotation.Bean;
+import com.github.houbb.heaven.util.util.SetUtil;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * bean 工厂接口
+ *
  * @author binbin.hou
  * @since 0.0.1
  */
@@ -37,12 +38,14 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 对象信息 map
+     *
      * @since 0.0.1
      */
     private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
 
     /**
      * 对象 map
+     *
      * @since 0.0.1
      */
     private Map<String, Object> beanMap = new ConcurrentHashMap<>();
@@ -51,6 +54,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * 类型集合
      * （1）主要是为了 type 类型，获取对应的信息为做准备
      * （2）考虑到懒加载的处理。
+     *
      * @see #getBean(String, Class) 获取对应对象信息
      * @since 0.0.2
      */
@@ -58,19 +62,22 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 实例于 bean 定义信息 map
+     *
      * @since 0.0.4
      */
     private List<Pair<Object, BeanDefinition>> instanceBeanDefinitionList = new ArrayList<>();
 
     /**
      * 依赖检测服务
+     *
      * @since 0.1.0
      */
     private DependsCheckService dependsCheckService = new DefaultDependsCheckService();
 
     /**
      * 注册对象定义信息
-     * @param beanName 属性信息
+     *
+     * @param beanName       属性信息
      * @param beanDefinition 对象定义
      * @since 0.0.1
      */
@@ -89,19 +96,21 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 创建需要创建的单例对象
+     *
      * @param beanDefinition 对象定义
      * @since 0.1.5
      */
     protected void createEagerSingleton(final BeanDefinition beanDefinition) {
         //3. 初始化 bean 信息-这里应该统一放在最后进行初始化。
         final String beanName = beanDefinition.getName();
-        if(needEagerCreateSingleton(beanDefinition)) {
+        if (needEagerCreateSingleton(beanDefinition)) {
             this.registerSingletonBean(beanName, beanDefinition);
         }
     }
 
     /**
      * 获取依赖检测服务
+     *
      * @return 服务实现
      * @since 0.1.0
      */
@@ -111,13 +120,14 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 通知所有的 beanName Aware 信息
+     *
      * @param beanName 属性信息
      * @since 0.0.8
      */
     private void notifyAllBeanNameAware(final String beanName) {
         List<BeanNameAware> awareList = this.getBeans(BeanNameAware.class);
 
-        for(BeanNameAware aware : awareList) {
+        for (BeanNameAware aware : awareList) {
             aware.setBeanName(beanName);
         }
     }
@@ -127,6 +137,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * （1）如果不需要立刻加载，则进行延迟处理
      * （2）如果存在构造器创建，则判断是否存在 dependsOn
      * 如果 {@link #beanMap} 中包含所有依赖对象，则直接创建，否则需要等待。
+     *
      * @param beanDefinition 定义信息
      * @return 是否
      * @since 0.0.7
@@ -134,17 +145,17 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     private boolean needEagerCreateSingleton(final BeanDefinition beanDefinition) {
         ArgUtil.notNull(beanDefinition, "beanDefinition");
 
-        if(beanDefinition.isLazyInit()) {
+        if (beanDefinition.isLazyInit()) {
             return false;
         }
         List<ConstructorArgDefinition> argDefinitionList = beanDefinition.getConstructorArgList();
-        if(CollectionUtil.isNotEmpty(argDefinitionList)) {
+        if (CollectionUtil.isNotEmpty(argDefinitionList)) {
             // 判断是否存在依赖
-            for(ConstructorArgDefinition argDefinition : argDefinitionList) {
+            for (ConstructorArgDefinition argDefinition : argDefinitionList) {
                 String ref = argDefinition.getRef();
-                if(StringUtil.isNotEmpty(ref)) {
+                if (StringUtil.isNotEmpty(ref)) {
                     Object instance = this.beanMap.get(ref);
-                    if(ObjectUtil.isNull(instance)) {
+                    if (ObjectUtil.isNull(instance)) {
                         return false;
                     }
                 }
@@ -156,15 +167,16 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 注册类型和 beanNames 信息
-     * @param beanName 单个 bean 名称
+     *
+     * @param beanName       单个 bean 名称
      * @param beanDefinition 对象定义
      * @since 0.0.2
      */
     private void registerTypeBeanNames(final String beanName, final BeanDefinition beanDefinition) {
         final Set<Class> typeSet = getTypeSet(beanDefinition);
-        for(Class type : typeSet) {
+        for (Class type : typeSet) {
             Set<String> beanNameSet = typeBeanNameMap.get(type);
-            if(ObjectUtil.isNull(beanNameSet)) {
+            if (ObjectUtil.isNull(beanNameSet)) {
                 beanNameSet = Guavas.newHashSet();
             }
             beanNameSet.add(beanName);
@@ -177,14 +189,15 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * （1）如果是 singleton & lazy-init=false 则进行初始化处理
      * （2）创建完成后，对象放入 {@link #beanMap} 中，便于后期使用
      * （3）
-     * @param beanName bean 名称
+     *
+     * @param beanName       bean 名称
      * @param beanDefinition 对象定义
      * @since 0.0.3
      */
     private Object registerSingletonBean(final String beanName, final BeanDefinition beanDefinition) {
         // 单例的流程
         Object bean = beanMap.get(beanName);
-        if(ObjectUtil.isNotNull(bean)) {
+        if (ObjectUtil.isNotNull(bean)) {
             // 这里直接返回的是单例，如果用户指定为多例，则每次都需要新建。
             return bean;
         }
@@ -199,28 +212,48 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 根据类型获取对应的属性名称
+     *
      * @param requiredType 需求类型
      * @return bean 名称列表
      * @since 0.0.2 初始化
      * @since 0.1.5 设置为公开方法
      */
-    public Set<String> getBeanNames(final Class requiredType) {
+    protected Set<String> getBeanNames(final Class requiredType) {
         ArgUtil.notNull(requiredType, "requiredType");
         return typeBeanNameMap.get(requiredType);
     }
 
+    @SuppressWarnings("unchecked")
+    protected <T> T getRequiredTypeBean(Class<T> requiredType, String beanName) {
+        Set<String> beanNames = getBeanNames(requiredType);
+        if (CollectionUtil.isEmpty(beanNames)) {
+            throw new IocRuntimeException("RequiredType of " + requiredType.getName() + " beans not found!");
+        }
+        if (beanNames.size() == 1) {
+            final String firstBeanName = SetUtil.getFirst(beanNames);
+            return (T) getBean(firstBeanName);
+        }
+        if (StringUtil.isNotEmpty(beanName)) {
+            return (T) getBean(beanName);
+        }
+
+        throw new IocRuntimeException("RequiredType of " + requiredType.getName() + " must be unique!");
+    }
+
     /**
      * 获取 beans 信息列表
+     *
      * @param requiredType 指定类型
-     * @param <T> 泛型
+     * @param <T>          泛型
      * @return 结果列表
      * @since 0.0.8
+     * @throws IocRuntimeException 如果没有发现对应类
      */
     protected <T> List<T> getBeans(final Class<T> requiredType) {
         ArgUtil.notNull(requiredType, "requiredType");
 
         Set<String> beanNames = this.getBeanNames(requiredType);
-        if(CollectionUtil.isEmpty(beanNames)) {
+        if (CollectionUtil.isEmpty(beanNames)) {
             return Guavas.newArrayList();
         }
 
@@ -238,13 +271,13 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         ArgUtil.notNull(beanName, "beanName");
         // 获取对应配置信息
         BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
-        if(ObjectUtil.isNull(beanDefinition)) {
+        if (ObjectUtil.isNull(beanDefinition)) {
             throw new IocRuntimeException(beanName + " not exists in bean define.");
         }
 
         // 如果为多例，直接创建新的对象即可。
         final String scope = beanDefinition.getScope();
-        if(!ScopeEnum.SINGLETON.getCode().equals(scope)) {
+        if (!ScopeEnum.SINGLETON.getCode().equals(scope)) {
             return this.createBean(beanDefinition);
         }
 
@@ -259,7 +292,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         ArgUtil.notNull(requiredType, "requiredType");
 
         Object object = getBean(beanName);
-        return (T)object;
+        return (T) object;
     }
 
     @Override
@@ -291,7 +324,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * （1）注解 {@link javax.annotation.PostConstruct}
      * （2）添加 {@link com.github.houbb.ioc.support.lifecycle.InitializingBean} 初始化相关处理
      * （3）添加 {@link BeanDefinition#getInitialize()} 初始化相关处理
-     *
+     * <p>
      * 如果想使用注解相关信息，考虑实现 AnnotationBeanDefinition 统一处理注解信息。
      * 本期暂时忽略 (1)
      *
@@ -303,7 +336,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         //1. 初始化相关处理
         final String beanName = beanDefinition.getName();
         //1.1 检测是否存在循环依赖
-        if(dependsCheckService.isCircleRef(beanName)) {
+        if (dependsCheckService.isCircleRef(beanName)) {
             throw new IocRuntimeException(beanName + " has circle reference.");
         }
 
@@ -325,14 +358,15 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
      * 通知所有对象创建监听器
-     * @param name 名称
+     *
+     * @param name     名称
      * @param instance 实例
      * @since 0.0.8
      */
     private void notifyAllBeanCreateAware(final String name, final Object instance) {
         List<BeanCreateAware> awareList = getBeans(BeanCreateAware.class);
 
-        for(BeanCreateAware aware : awareList) {
+        for (BeanCreateAware aware : awareList) {
             aware.setBeanCreate(name, instance);
         }
     }
@@ -341,6 +375,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * 获取类型集合
      * （1）当前类信息
      * （2）所有的接口类信息
+     *
      * @param beanDefinition 对象定义
      * @return 类型集合
      * @since 0.0.8
@@ -353,7 +388,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         classSet.add(currentClass);
 
         Class[] interfaces = currentClass.getInterfaces();
-        if(ArrayUtil.isNotEmpty(interfaces)) {
+        if (ArrayUtil.isNotEmpty(interfaces)) {
             classSet.addAll(Arrays.asList(interfaces));
         }
         return classSet;
@@ -365,7 +400,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         // 销毁所有的属性信息
         // 这里的销毁严格来说，还有很多事情要做。
         // 比如销毁的顺序：最外层没有依赖的开始销毁，依次往里，直到销毁全部。可能会出现循环依赖，类似于 GC。
-        for(Pair<Object, BeanDefinition> entry : instanceBeanDefinitionList) {
+        for (Pair<Object, BeanDefinition> entry : instanceBeanDefinitionList) {
             DisposableBean disposableBean = new DefaultPreDestroyBean(entry.getValueOne(), entry.getValueTwo());
             disposableBean.destroy();
         }

@@ -12,6 +12,7 @@ import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.heaven.util.util.SetUtil;
 import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
+import com.github.houbb.ioc.core.ListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
@@ -108,15 +109,16 @@ class ConfigurationMethodBean extends AbstractNewInstanceBean {
      * @param annotationBeanDefinition 注解属性名称
      * @since 0.1.5
      */
-    public void fillRefName(final BeanFactory beanFactory,
+    private void fillRefName(final BeanFactory beanFactory,
                              final AnnotationBeanDefinition annotationBeanDefinition) {
         if(BeanSourceTypeEnum.isConfigurationBean(annotationBeanDefinition.getBeanSourceType())) {
             final String beanName = annotationBeanDefinition.getName();
             Class[] paramTypes = annotationBeanDefinition.getConfigBeanMethodParamTypes();
+            final ListableBeanFactory listableBeanFactory = (ListableBeanFactory)beanFactory;
             if(ArrayUtil.isNotEmpty(paramTypes)) {
                 List<String> paramRefs = annotationBeanDefinition.getConfigBeanMethodParamRefs();
                 for(int i = 0; i < paramTypes.length; i++) {
-                    Set<String> beanNames = beanFactory.getBeanNames(paramTypes[i]);
+                    Set<String> beanNames = listableBeanFactory.getBeanNames(paramTypes[i]);
                     if(CollectionUtil.isEmpty(beanNames)) {
                         throw new IocRuntimeException(beanName + " configuration method param of ["+i+"] not found!");
                     }

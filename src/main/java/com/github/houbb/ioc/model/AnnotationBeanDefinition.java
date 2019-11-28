@@ -47,6 +47,7 @@ public interface AnnotationBeanDefinition extends BeanDefinition {
 
     /**
      * 获取对象方法参数类型列表
+     * @return 参数类型列表
      * @since 0.1.5
      */
     Class[] getConfigBeanMethodParamTypes();
@@ -61,6 +62,7 @@ public interface AnnotationBeanDefinition extends BeanDefinition {
     /**
      * 获取参数依赖的对象列表
      * @since 0.1.5
+     * @return 依赖的对象列表
      */
     List<String> getConfigBeanMethodParamRefs();
 

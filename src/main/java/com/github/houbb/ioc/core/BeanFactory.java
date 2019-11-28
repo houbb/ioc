@@ -55,12 +55,6 @@ public interface BeanFactory {
      */
     Class<?> getType(final String beanName);
 
-    /**
-     * 根据类型获取对应的 bean 名称列表
-     * @param requiredType 类型
-     * @return 对应的列表
-     * @since 0.1.5
-     */
-    Set<String> getBeanNames(final Class requiredType);
+
 
 }
