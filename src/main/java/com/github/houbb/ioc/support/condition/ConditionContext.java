@@ -1,6 +1,7 @@
 package com.github.houbb.ioc.support.condition;
 
 import com.github.houbb.ioc.core.BeanFactory;
+import com.github.houbb.ioc.support.lifecycle.registry.BeanDefinitionRegistry;
 
 /**
  * 条件上下文执行接口
@@ -15,5 +16,12 @@ public interface ConditionContext {
      * @since 0.1.8
      */
     BeanFactory getBeanFactory();
+
+    /**
+     * 获取对象信息注册类
+     * @return 对象信息注册类
+     * @since 0.1.8
+     */
+    BeanDefinitionRegistry getBeanDefinitionRegistry();
 
 }

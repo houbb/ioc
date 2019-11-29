@@ -11,10 +11,10 @@ import com.github.houbb.ioc.support.aware.service.impl.DefaultAwareService;
 import com.github.houbb.ioc.support.cycle.DependsCheckService;
 import com.github.houbb.ioc.support.cycle.impl.DefaultDependsCheckService;
 import com.github.houbb.ioc.support.lifecycle.DisposableBean;
-import com.github.houbb.ioc.support.lifecycle.create.service.BeanCreateService;
-import com.github.houbb.ioc.support.lifecycle.create.service.impl.DefaultBeanCreateService;
 import com.github.houbb.ioc.support.lifecycle.registry.BeanDefinitionRegistry;
 import com.github.houbb.ioc.support.lifecycle.registry.impl.DefaultBeanDefinitionRegistry;
+import com.github.houbb.ioc.support.lifecycle.service.BeanLifecycleService;
+import com.github.houbb.ioc.support.lifecycle.service.impl.DefaultBeanLifecycleService;
 
 /**
  * bean 工厂接口
@@ -42,7 +42,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * 对象创建服务类
      * @since 0.1.8
      */
-    protected BeanCreateService beanCreateService = new DefaultBeanCreateService();
+    protected BeanLifecycleService beanLifecycleService = new DefaultBeanLifecycleService();
 
     /**
      * 监听通知服务类
@@ -53,8 +53,8 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     public DefaultBeanFactory() {
         awareService.setBeanFactory(this);
 
-        beanCreateService.setBeanFactory(this);
-        beanCreateService.setDependsCheckService(this.dependsCheckService);
+        beanLifecycleService.setBeanFactory(this);
+        beanLifecycleService.setDependsCheckService(this.dependsCheckService);
     }
 
     /**
@@ -82,11 +82,11 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         // 如果为多例，直接创建新的对象即可。
         final String scope = beanDefinition.getScope();
         if (!ScopeEnum.SINGLETON.getCode().equals(scope)) {
-            return beanCreateService.createBean(beanDefinition);
+            return beanLifecycleService.createBean(beanDefinition);
         }
 
         // 单例的流程
-        return beanCreateService.registerSingletonBean(beanName, beanDefinition);
+        return beanLifecycleService.registerSingletonBean(beanName, beanDefinition);
     }
 
     @Override

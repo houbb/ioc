@@ -1,4 +1,4 @@
-package com.github.houbb.ioc.support.lifecycle.create.service;
+package com.github.houbb.ioc.support.lifecycle.service;
 
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.model.BeanDefinition;
@@ -10,7 +10,7 @@ import com.github.houbb.ioc.support.lifecycle.DisposableBean;
  * @author binbin.hou
  * @since 0.1.8
  */
-public interface BeanCreateService extends DisposableBean {
+public interface BeanLifecycleService extends DisposableBean {
 
     /**
      * 设置 bean 工厂属性

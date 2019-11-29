@@ -106,7 +106,7 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
             // 初始化 eager 单例对象 @since 0.1.5
             // 调整顺序，避免信息未加载完成
             for(BeanDefinition beanDefinition : beanDefinitionList) {
-                beanCreateService.createEagerSingleton(beanDefinition);
+                beanLifecycleService.createEagerSingleton(beanDefinition);
             }
         }
     }
@@ -257,7 +257,7 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
 
     @Override
     public void destroy() {
-        beanCreateService.destroy();
+        beanLifecycleService.destroy();
     }
 
 }
