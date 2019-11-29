@@ -29,6 +29,7 @@ public class ClassPathBeanDefinitionScanner implements BeanDefinitionScanner {
      * @return 结果列表
      * @since 0.1.1
      */
+    @Override
     public Set<BeanDefinition> scan(final String... packageNames) {
         ArgUtil.notEmpty(packageNames, "packageNames");
 

@@ -1,21 +1,15 @@
 package com.github.houbb.ioc.core.impl;
 
-import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.support.tuple.impl.Pair;
 import com.github.houbb.heaven.util.common.ArgUtil;
-import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
-import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
-import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.ConstructorArgDefinition;
-import com.github.houbb.ioc.support.aware.BeanCreateAware;
-import com.github.houbb.ioc.support.aware.BeanNameAware;
 import com.github.houbb.ioc.support.cycle.DependsCheckService;
 import com.github.houbb.ioc.support.cycle.impl.DefaultDependsCheckService;
 import com.github.houbb.ioc.support.lifecycle.DisposableBean;
@@ -23,8 +17,12 @@ import com.github.houbb.ioc.support.lifecycle.InitializingBean;
 import com.github.houbb.ioc.support.lifecycle.create.DefaultNewInstanceBean;
 import com.github.houbb.ioc.support.lifecycle.destroy.DefaultPreDestroyBean;
 import com.github.houbb.ioc.support.lifecycle.init.DefaultPostConstructBean;
+import com.github.houbb.ioc.support.lifecycle.registry.BeanDefinitionRegistry;
+import com.github.houbb.ioc.support.lifecycle.registry.impl.DefaultBeanDefinitionRegistry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -36,28 +34,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultBeanFactory implements BeanFactory, DisposableBean {
 
     /**
-     * 对象信息 map
-     *
-     * @since 0.0.1
-     */
-    private Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
-
-    /**
      * 对象 map
      *
      * @since 0.0.1
      */
     private Map<String, Object> beanMap = new ConcurrentHashMap<>();
-
-    /**
-     * 类型集合
-     * （1）主要是为了 type 类型，获取对应的信息为做准备
-     * （2）考虑到懒加载的处理。
-     *
-     * @see #getBean(String, Class) 获取对应对象信息
-     * @since 0.0.2
-     */
-    private Map<Class, Set<String>> typeBeanNameMap = new ConcurrentHashMap<>();
 
     /**
      * 实例于 bean 定义信息 map
@@ -74,6 +55,13 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     private DependsCheckService dependsCheckService = new DefaultDependsCheckService();
 
     /**
+     * 对象信息注册
+     *
+     * @since 0.1.8
+     */
+    protected BeanDefinitionRegistry beanDefinitionRegistry = new DefaultBeanDefinitionRegistry();
+
+    /**
      * 注册对象定义信息
      *
      * @param beanName       属性信息
@@ -81,16 +69,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * @since 0.0.1
      */
     protected void registerBeanDefinition(final String beanName, final BeanDefinition beanDefinition) {
-        ArgUtil.notEmpty(beanName, "beanName");
-        ArgUtil.notNull(beanDefinition, "beanDefinition");
-
-        this.beanDefinitionMap.put(beanName, beanDefinition);
-
-        //2. 注册类型和 beanNames 信息
-        this.registerTypeBeanNames(beanName, beanDefinition);
-
-        //2.1 添加监听器
-        this.notifyAllBeanNameAware(beanName);
+        beanDefinitionRegistry.registerBeanDefinition(beanName, beanDefinition);
     }
 
     /**
@@ -115,20 +94,6 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      */
     protected DependsCheckService getDependsCheckService() {
         return this.dependsCheckService;
-    }
-
-    /**
-     * 通知所有的 beanName Aware 信息
-     *
-     * @param beanName 属性信息
-     * @since 0.0.8
-     */
-    private void notifyAllBeanNameAware(final String beanName) {
-        List<BeanNameAware> awareList = this.getBeans(BeanNameAware.class);
-
-        for (BeanNameAware aware : awareList) {
-            aware.setBeanName(beanName);
-        }
     }
 
     /**
@@ -165,25 +130,6 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     }
 
     /**
-     * 注册类型和 beanNames 信息
-     *
-     * @param beanName       单个 bean 名称
-     * @param beanDefinition 对象定义
-     * @since 0.0.2
-     */
-    private void registerTypeBeanNames(final String beanName, final BeanDefinition beanDefinition) {
-        final Set<Class> typeSet = getTypeSet(beanDefinition);
-        for (Class type : typeSet) {
-            Set<String> beanNameSet = typeBeanNameMap.get(type);
-            if (ObjectUtil.isNull(beanNameSet)) {
-                beanNameSet = Guavas.newHashSet();
-            }
-            beanNameSet.add(beanName);
-            typeBeanNameMap.put(type, beanNameSet);
-        }
-    }
-
-    /**
      * 注册单例且渴望初期初始化的对象
      * （1）如果是 singleton & lazy-init=false 则进行初始化处理
      * （2）创建完成后，对象放入 {@link #beanMap} 中，便于后期使用
@@ -208,51 +154,11 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
         return newBean;
     }
 
-
-    /**
-     * 根据类型获取对应的属性名称
-     *
-     * @param requiredType 需求类型
-     * @return bean 名称列表
-     * @since 0.0.2 初始化
-     * @since 0.1.5 设置为公开方法
-     */
-    protected Set<String> getBeanNames(final Class requiredType) {
-        ArgUtil.notNull(requiredType, "requiredType");
-        return typeBeanNameMap.get(requiredType);
-    }
-
-    /**
-     * 获取 beans 信息列表
-     *
-     * @param requiredType 指定类型
-     * @param <T>          泛型
-     * @return 结果列表
-     * @since 0.0.8
-     * @throws IocRuntimeException 如果没有发现对应类
-     */
-    protected <T> List<T> getBeans(final Class<T> requiredType) {
-        ArgUtil.notNull(requiredType, "requiredType");
-
-        Set<String> beanNames = this.getBeanNames(requiredType);
-        if (CollectionUtil.isEmpty(beanNames)) {
-            return Guavas.newArrayList();
-        }
-
-        // 构建结果
-        return CollectionUtil.toList(beanNames, new IHandler<String, T>() {
-            @Override
-            public T handle(String name) {
-                return getBean(name, requiredType);
-            }
-        });
-    }
-
     @Override
     public Object getBean(String beanName) {
         ArgUtil.notNull(beanName, "beanName");
         // 获取对应配置信息
-        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+        BeanDefinition beanDefinition = beanDefinitionRegistry.getBeanDefinition(beanName);
         if (ObjectUtil.isNull(beanDefinition)) {
             throw new IocRuntimeException(beanName + " not exists in bean define.");
         }
@@ -280,8 +186,7 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
     @Override
     public boolean containsBean(String beanName) {
         ArgUtil.notNull(beanName, "beanName");
-
-        return beanDefinitionMap.containsKey(beanName);
+        return beanDefinitionRegistry.containsBeanDefinition(beanName);
     }
 
     @Override
@@ -345,37 +250,8 @@ public class DefaultBeanFactory implements BeanFactory, DisposableBean {
      * @param instance 实例
      * @since 0.0.8
      */
-    private void notifyAllBeanCreateAware(final String name, final Object instance) {
-        List<BeanCreateAware> awareList = getBeans(BeanCreateAware.class);
-
-        for (BeanCreateAware aware : awareList) {
-            aware.setBeanCreate(name, instance);
-        }
+    protected void notifyAllBeanCreateAware(final String name, final Object instance) {
     }
-
-    /**
-     * 获取类型集合
-     * （1）当前类信息
-     * （2）所有的接口类信息
-     *
-     * @param beanDefinition 对象定义
-     * @return 类型集合
-     * @since 0.0.8
-     */
-    private Set<Class> getTypeSet(final BeanDefinition beanDefinition) {
-        Set<Class> classSet = Guavas.newHashSet();
-
-        String className = beanDefinition.getClassName();
-        Class currentClass = ClassUtil.getClass(className);
-        classSet.add(currentClass);
-
-        Class[] interfaces = currentClass.getInterfaces();
-        if (ArrayUtil.isNotEmpty(interfaces)) {
-            classSet.addAll(Arrays.asList(interfaces));
-        }
-        return classSet;
-    }
-
 
     @Override
     public void destroy() {

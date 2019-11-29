@@ -1,5 +1,7 @@
 package com.github.houbb.ioc.core.impl;
 
+import com.github.houbb.heaven.support.handler.IHandler;
+import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
@@ -7,6 +9,10 @@ import com.github.houbb.heaven.util.util.SetUtil;
 import com.github.houbb.ioc.annotation.Primary;
 import com.github.houbb.ioc.core.ListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
+import com.github.houbb.ioc.model.BeanDefinition;
+import com.github.houbb.ioc.support.aware.BeanCreateAware;
+import com.github.houbb.ioc.support.aware.service.AwareService;
+import com.github.houbb.ioc.support.aware.service.impl.DefaultAwareService;
 
 import java.util.List;
 import java.util.Set;
@@ -18,14 +24,48 @@ import java.util.Set;
  */
 public class DefaultListableBeanFactory extends DefaultBeanFactory implements ListableBeanFactory {
 
+    /**
+     * 监听通知服务类
+     * @since 0.1.8
+     */
+    private AwareService awareService = new DefaultAwareService();
+
+    /**
+     * 获取 beans 信息列表
+     *
+     * @param requiredType 指定类型
+     * @param <T>          泛型
+     * @return 结果列表
+     * @since 0.0.8
+     * @throws IocRuntimeException 如果没有发现对应类
+     */
     @Override
     public <T> List<T> getBeans(final Class<T> requiredType) {
-        return super.getBeans(requiredType);
+        Set<String> beanNames = beanDefinitionRegistry.getBeanNames(requiredType);
+        if (CollectionUtil.isEmpty(beanNames)) {
+            return Guavas.newArrayList();
+        }
+
+        // 构建结果
+        return CollectionUtil.toList(beanNames, new IHandler<String, T>() {
+            @Override
+            public T handle(String name) {
+                return getBean(name, requiredType);
+            }
+        });
     }
 
+    /**
+     * 根据类型获取对应的属性名称
+     *
+     * @param requiredType 需求类型
+     * @return bean 名称列表
+     * @since 0.0.2 初始化
+     * @since 0.1.5 设置为公开方法
+     */
     @Override
     public Set<String> getBeanNames(Class requiredType) {
-        return super.getBeanNames(requiredType);
+        return beanDefinitionRegistry.getBeanNames(requiredType);
     }
 
     @Override
@@ -52,6 +92,16 @@ public class DefaultListableBeanFactory extends DefaultBeanFactory implements Li
         throw new IocRuntimeException("RequiredType of " + requiredType.getName() + " must be unique!");
     }
 
+    @Override
+    protected void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
+        // 基本属性注册
+        super.registerBeanDefinition(beanName, beanDefinition);
+
+        // 通知所有监听者
+        awareService.setBeanFactory(this);
+        awareService.notifyAllAware(beanName);
+    }
+
     /**
      * 获取指定了 {@link com.github.houbb.ioc.annotation.Primary} 优先的对象
      * （1）优先返回第一个该注解指定的对象
@@ -75,6 +125,22 @@ public class DefaultListableBeanFactory extends DefaultBeanFactory implements Li
             }
         }
         return null;
+    }
+
+    /**
+     * 通知所有对象创建监听器
+     *
+     * @param name     名称
+     * @param instance 实例
+     * @since 0.0.8
+     */
+    @Override
+    protected void notifyAllBeanCreateAware(final String name, final Object instance) {
+        List<BeanCreateAware> awareList = getBeans(BeanCreateAware.class);
+
+        for (BeanCreateAware aware : awareList) {
+            aware.setBeanCreate(name, instance);
+        }
     }
 
 }

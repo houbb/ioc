@@ -131,6 +131,7 @@ public class DefaultDependsCheckService implements DependsCheckService {
      * @return 是否依赖
      * @since 0.1.0
      */
+    @Override
     public boolean isCircleRef(String beanName) {
         ArgUtil.notEmpty(beanName, "beanName");
 
