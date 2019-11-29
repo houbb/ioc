@@ -1,5 +1,6 @@
 package com.github.houbb.ioc.support.condition;
 
+import com.github.houbb.heaven.reflect.meta.annotation.IAnnotationTypeMeta;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.support.lifecycle.registry.BeanDefinitionRegistry;
 
@@ -23,5 +24,12 @@ public interface ConditionContext {
      * @since 0.1.8
      */
     BeanDefinitionRegistry getBeanDefinitionRegistry();
+
+    /**
+     * 获取注解相关元信息
+     * @return 注解元信息
+     * @since 0.1.8
+     */
+    IAnnotationTypeMeta getAnnotationTypeMeta();
 
 }

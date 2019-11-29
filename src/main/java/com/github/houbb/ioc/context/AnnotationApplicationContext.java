@@ -1,26 +1,28 @@
 package com.github.houbb.ioc.context;
 
+import com.github.houbb.heaven.reflect.meta.annotation.IAnnotationTypeMeta;
+import com.github.houbb.heaven.reflect.meta.annotation.impl.ClassAnnotationTypeMeta;
 import com.github.houbb.heaven.support.instance.impl.Instances;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.lang.reflect.ReflectAnnotationUtil;
 import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.Optional;
-import com.github.houbb.ioc.annotation.Bean;
-import com.github.houbb.ioc.annotation.Configuration;
-import com.github.houbb.ioc.annotation.Import;
-import com.github.houbb.ioc.annotation.Primary;
+import com.github.houbb.ioc.annotation.*;
 import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.impl.DefaultAnnotationBeanDefinition;
 import com.github.houbb.ioc.support.annotation.Lazys;
 import com.github.houbb.ioc.support.annotation.Scopes;
+import com.github.houbb.ioc.support.condition.Condition;
 import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
@@ -168,6 +170,8 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
             return Optional.empty();
         }
 
+        // 指定 conditional
+
         Configuration configuration = (Configuration) clazz.getAnnotation(Configuration.class);
         String beanName = configuration.value();
 
@@ -187,6 +191,35 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
         }
 
         return Optional.of(beanDefinition);
+    }
+
+    /**
+     * 类级别是否匹配
+     * （1）获取所有 {@link Conditional} 相关注解
+     * （2）获取注解对应的 {@link Conditional#value()} 对应的类信息
+     * （3）获取当前注解对应的属性信息 {@link IAnnotationTypeMeta#getAnnotationAttributes(String)}
+     *
+     * TODO: 执行核心实现
+     * @param clazz 类
+     * @return 是否匹配
+     * @since 0.1.8
+     */
+    private boolean classConditionalMatches(final Class clazz) {
+        IAnnotationTypeMeta typeMeta = new ClassAnnotationTypeMeta(clazz);
+
+        //1. 直接获取注解信息
+        if(clazz.isAnnotationPresent(Conditional.class)) {
+            Conditional conditional = (Conditional) clazz.getAnnotation(Conditional.class);
+            Condition condition = ClassUtil.newInstance(conditional.value());
+
+        }
+
+        //2. 获取拓展引用的注解信息
+        List<Annotation> conditionalAnnotations = typeMeta.getAnnotationRefs(Conditional.class.getName());
+        for(Annotation annotation : conditionalAnnotations) {
+
+        }
+        return true;
     }
 
     /**
