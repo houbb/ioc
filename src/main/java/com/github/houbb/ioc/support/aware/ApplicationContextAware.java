@@ -20,6 +20,6 @@ public interface ApplicationContextAware extends Aware {
      * @throws IocRuntimeException 运行时异常
      * @since 0.0.8
      */
-    void setApplicationContext(ApplicationContext applicationContext) throws IocRuntimeException;
+    void setApplicationContext(ApplicationContext applicationContext);
 
 }

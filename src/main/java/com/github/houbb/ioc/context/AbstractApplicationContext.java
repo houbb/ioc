@@ -11,7 +11,6 @@ import com.github.houbb.ioc.core.impl.DefaultListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
-import com.github.houbb.ioc.support.aware.ApplicationContextAware;
 import com.github.houbb.ioc.support.processor.ApplicationContextPostProcessor;
 
 import java.util.List;
@@ -77,7 +76,7 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
         createAbleDefinitionList = this.postProcessor(createAbleDefinitionList);
 
         // 注册所有的依赖检测
-        super.getDependsCheckService().registerBeanDefinitions(createAbleDefinitionList);
+        super.dependsCheckService.registerBeanDefinitions(createAbleDefinitionList);
 
         // 基本属性的设置注册
         this.registerBeanDefinitions(createAbleDefinitionList);
@@ -85,7 +84,8 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
         // 注册钩子函数
         this.registerShutdownHook();
 
-        this.notifyAllAware();
+        // 通知所有上下文监听器
+        awareService.notifyAllApplicationContextAware(this);
     }
 
     /**
@@ -106,7 +106,7 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
             // 初始化 eager 单例对象 @since 0.1.5
             // 调整顺序，避免信息未加载完成
             for(BeanDefinition beanDefinition : beanDefinitionList) {
-                super.createEagerSingleton(beanDefinition);
+                beanCreateService.createEagerSingleton(beanDefinition);
             }
         }
     }
@@ -243,19 +243,6 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
     }
 
     /**
-     * 注册处理所有的 {@link com.github.houbb.ioc.support.aware.ApplicationContextAware} 监听器
-     * @since 0.0.8
-     */
-    private void notifyAllAware() {
-        List<ApplicationContextAware> awareList = super.getBeans(ApplicationContextAware.class);
-
-        for(ApplicationContextAware aware : awareList) {
-            aware.setApplicationContext(this);
-        }
-    }
-
-
-    /**
      * 注册关闭钩子函数
      * @since 0.0.4
      */
@@ -266,6 +253,11 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
                 AbstractApplicationContext.this.destroy();
             }
         });
+    }
+
+    @Override
+    public void destroy() {
+        beanCreateService.destroy();
     }
 
 }

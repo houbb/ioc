@@ -17,6 +17,6 @@ public interface BeanNameAware extends Aware {
      * @throws IocRuntimeException 运行时异常
      * @since 0.0.8
      */
-    void setBeanName(String name) throws IocRuntimeException;
+    void setBeanName(String name);
 
 }

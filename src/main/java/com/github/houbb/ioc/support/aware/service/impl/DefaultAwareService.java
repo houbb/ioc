@@ -1,6 +1,9 @@
 package com.github.houbb.ioc.support.aware.service.impl;
 
+import com.github.houbb.ioc.context.ApplicationContext;
+import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.core.ListableBeanFactory;
+import com.github.houbb.ioc.support.aware.ApplicationContextAware;
 import com.github.houbb.ioc.support.aware.BeanNameAware;
 import com.github.houbb.ioc.support.aware.service.AwareService;
 
@@ -17,24 +20,35 @@ public class DefaultAwareService implements AwareService {
      * 对象工厂
      * @since 0.1.8
      */
-    private ListableBeanFactory beanFactory;
+    private BeanFactory beanFactory;
 
     @Override
-    public AwareService setBeanFactory(ListableBeanFactory beanFactory) {
+    public void setBeanFactory(BeanFactory beanFactory) {
         this.beanFactory = beanFactory;
-        return this;
     }
 
     @Override
-    public AwareService notifyAllAware(String beanName) {
-        List<BeanNameAware> awareList = beanFactory.getBeans(BeanNameAware.class);
+    public void notifyAllBeanNameAware(String beanName) {
+        if(this.beanFactory instanceof ListableBeanFactory) {
+            ListableBeanFactory listableBeanFactory = (ListableBeanFactory)beanFactory;
+            List<BeanNameAware> awareList = listableBeanFactory.getBeans(BeanNameAware.class);
 
-        for (BeanNameAware aware : awareList) {
-            aware.setBeanName(beanName);
+            for (BeanNameAware aware : awareList) {
+                aware.setBeanName(beanName);
+            }
         }
-
-        return this;
     }
 
+    @Override
+    public void notifyAllApplicationContextAware(ApplicationContext applicationContext) {
+        if(beanFactory instanceof ListableBeanFactory) {
+            ListableBeanFactory listableBeanFactory = (ListableBeanFactory)beanFactory;
+            List<ApplicationContextAware> awareList = listableBeanFactory.getBeans(ApplicationContextAware.class);
+
+            for(ApplicationContextAware aware : awareList) {
+                aware.setApplicationContext(applicationContext);
+            }
+        }
+    }
 
 }

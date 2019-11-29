@@ -10,7 +10,6 @@ import com.github.houbb.ioc.annotation.Primary;
 import com.github.houbb.ioc.core.ListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.BeanDefinition;
-import com.github.houbb.ioc.support.aware.BeanCreateAware;
 import com.github.houbb.ioc.support.aware.service.AwareService;
 import com.github.houbb.ioc.support.aware.service.impl.DefaultAwareService;
 
@@ -23,12 +22,6 @@ import java.util.Set;
  * @since 0.0.2
  */
 public class DefaultListableBeanFactory extends DefaultBeanFactory implements ListableBeanFactory {
-
-    /**
-     * 监听通知服务类
-     * @since 0.1.8
-     */
-    private AwareService awareService = new DefaultAwareService();
 
     /**
      * 获取 beans 信息列表
@@ -92,16 +85,6 @@ public class DefaultListableBeanFactory extends DefaultBeanFactory implements Li
         throw new IocRuntimeException("RequiredType of " + requiredType.getName() + " must be unique!");
     }
 
-    @Override
-    protected void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
-        // 基本属性注册
-        super.registerBeanDefinition(beanName, beanDefinition);
-
-        // 通知所有监听者
-        awareService.setBeanFactory(this);
-        awareService.notifyAllAware(beanName);
-    }
-
     /**
      * 获取指定了 {@link com.github.houbb.ioc.annotation.Primary} 优先的对象
      * （1）优先返回第一个该注解指定的对象
@@ -125,22 +108,6 @@ public class DefaultListableBeanFactory extends DefaultBeanFactory implements Li
             }
         }
         return null;
-    }
-
-    /**
-     * 通知所有对象创建监听器
-     *
-     * @param name     名称
-     * @param instance 实例
-     * @since 0.0.8
-     */
-    @Override
-    protected void notifyAllBeanCreateAware(final String name, final Object instance) {
-        List<BeanCreateAware> awareList = getBeans(BeanCreateAware.class);
-
-        for (BeanCreateAware aware : awareList) {
-            aware.setBeanCreate(name, instance);
-        }
     }
 
 }

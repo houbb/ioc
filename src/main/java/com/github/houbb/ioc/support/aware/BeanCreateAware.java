@@ -19,6 +19,6 @@ public interface BeanCreateAware extends Aware {
      * @throws IocRuntimeException 运行时异常
      * @since 0.0.8
      */
-    void setBeanCreate(String name, final Object instance) throws IocRuntimeException;
+    void setBeanCreate(String name, final Object instance);
 
 }
