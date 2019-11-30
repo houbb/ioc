@@ -3,10 +3,7 @@ package com.github.houbb.ioc.test.context;
 import com.github.houbb.ioc.context.AnnotationApplicationContext;
 import com.github.houbb.ioc.context.JsonApplicationContext;
 import com.github.houbb.ioc.core.BeanFactory;
-import com.github.houbb.ioc.test.config.AppAutowiredCollectionConfig;
-import com.github.houbb.ioc.test.config.AppAutowiredConfig;
-import com.github.houbb.ioc.test.config.AppAutowiredPrimaryConfig;
-import com.github.houbb.ioc.test.config.AppConfig;
+import com.github.houbb.ioc.test.config.*;
 import com.github.houbb.ioc.test.model.Book;
 import com.github.houbb.ioc.test.service.Apple;
 import org.junit.Assert;
@@ -73,5 +70,16 @@ public class AnnotationApplicationContextTest {
         Assert.assertEquals("good", book.getName());
     }
 
+    /**
+     * 条件测试
+     * @since 0.1.8
+     */
+    @Test
+    public void conditionalTest() {
+        BeanFactory beanFactory = new AnnotationApplicationContext(AppBeanConditionConfig.class);
+
+        Assert.assertFalse(beanFactory.containsBean("book"));
+        Assert.assertTrue(beanFactory.containsBean("book2"));
+    }
 
 }

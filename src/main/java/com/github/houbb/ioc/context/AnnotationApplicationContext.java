@@ -2,7 +2,9 @@ package com.github.houbb.ioc.context;
 
 import com.github.houbb.heaven.reflect.meta.annotation.IAnnotationTypeMeta;
 import com.github.houbb.heaven.reflect.meta.annotation.impl.ClassAnnotationTypeMeta;
+import com.github.houbb.heaven.reflect.meta.annotation.impl.MethodAnnotationTypeMeta;
 import com.github.houbb.heaven.support.instance.impl.Instances;
+import com.github.houbb.heaven.support.tuple.impl.Pair;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.StringUtil;
@@ -19,6 +21,7 @@ import com.github.houbb.ioc.model.impl.DefaultAnnotationBeanDefinition;
 import com.github.houbb.ioc.support.annotation.Lazys;
 import com.github.houbb.ioc.support.annotation.Scopes;
 import com.github.houbb.ioc.support.condition.Condition;
+import com.github.houbb.ioc.support.condition.impl.DefaultConditionContext;
 import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
 
@@ -170,7 +173,11 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
             return Optional.empty();
         }
 
-        // 指定 conditional
+        // 指定 conditional 验证，不符合条件直接返回。
+        IAnnotationTypeMeta classTypeMeta = new ClassAnnotationTypeMeta(clazz);
+        if(!conditionalMatches(classTypeMeta)) {
+            return Optional.empty();
+        }
 
         Configuration configuration = (Configuration) clazz.getAnnotation(Configuration.class);
         String beanName = configuration.value();
@@ -199,26 +206,43 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
      * （2）获取注解对应的 {@link Conditional#value()} 对应的类信息
      * （3）获取当前注解对应的属性信息 {@link IAnnotationTypeMeta#getAnnotationAttributes(String)}
      *
-     * TODO: 执行核心实现
-     * @param clazz 类
+     * @param typeMeta 注解原始信息
      * @return 是否匹配
      * @since 0.1.8
      */
-    private boolean classConditionalMatches(final Class clazz) {
-        IAnnotationTypeMeta typeMeta = new ClassAnnotationTypeMeta(clazz);
+    private boolean conditionalMatches(IAnnotationTypeMeta typeMeta) {
+        Map<Class<? extends Condition>, Map<String, Object>> map = Guavas.newHashMap();
+        final String conditionalClassName = Conditional.class.getName();
 
         //1. 直接获取注解信息
-        if(clazz.isAnnotationPresent(Conditional.class)) {
-            Conditional conditional = (Conditional) clazz.getAnnotation(Conditional.class);
-            Condition condition = ClassUtil.newInstance(conditional.value());
-
+        if(typeMeta.isAnnotated(conditionalClassName)) {
+            Conditional conditional = (Conditional) typeMeta.getAnnotation(conditionalClassName);
+            map.put(conditional.value(), null);
         }
 
         //2. 获取拓展引用的注解信息
-        List<Annotation> conditionalAnnotations = typeMeta.getAnnotationRefs(Conditional.class.getName());
+        List<Annotation> conditionalAnnotations = typeMeta.getAnnotationRefs(conditionalClassName);
         for(Annotation annotation : conditionalAnnotations) {
-
+            Map<String, Object> attributes = ReflectAnnotationUtil.getAnnotationAttributes(annotation);
+            final String annotationTypeName = annotation.annotationType().getName();
+            Conditional conditionalReferenced = (Conditional) typeMeta.getAnnotationReferenced(conditionalClassName, annotationTypeName);
+            map.put(conditionalReferenced.value(), attributes);
         }
+
+        //3. 循环处理
+        DefaultConditionContext conditionContext = new DefaultConditionContext();
+        conditionContext.setBeanFactory(this);
+        conditionContext.setBeanDefinitionRegistry(beanDefinitionRegistry);
+        conditionContext.setAnnotationTypeMeta(typeMeta);
+
+        for(Map.Entry<Class<? extends Condition>, Map<String, Object>> entry : map.entrySet()) {
+            Condition condition = ClassUtil.newInstance(entry.getKey());
+            boolean match = condition.matches(conditionContext, entry.getValue());
+            if(!match) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -230,6 +254,15 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
      * 这两样可以考虑放在 AnnotationBeanDefinition 中。
      * （3）beanName 应该怎么获取？根据 methodName（这个） 还是根据 className？
      * 这个逻辑可以放在 {@link BeanNameStrategy} 中，保证逻辑的统一性。
+     *
+     *
+     * 【条件验证】
+     *
+     * 方法级别添加类验证 {@link Conditional}，如果不符合则直接跳过该类。
+     * 如果该类没有对应的注解，不用关心 class 级别注解。
+     * 因为：
+     * （1）若类指定的条件不符合，不会走到方法级别。整个类都不会进行处理
+     * （2）若类级别指定的条件符合，则肯定为 true。
      *
      * @param configuration 对象配置定义信息
      * @param clazz 类型信息
@@ -246,6 +279,12 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
         List<Method> methodList = ClassUtil.getMethodList(clazz);
         for(Method method : methodList) {
             if(method.isAnnotationPresent(Bean.class)) {
+                //1. 方法级别注解判定，如果不符合条件，则直接跳过。
+                IAnnotationTypeMeta methodTypeMeta = new MethodAnnotationTypeMeta(method);
+                if(!conditionalMatches(methodTypeMeta)) {
+                    continue;
+                }
+
                 Bean bean = method.getAnnotation(Bean.class);
                 String methodName = method.getName();
                 Class<?> returnType = method.getReturnType();
