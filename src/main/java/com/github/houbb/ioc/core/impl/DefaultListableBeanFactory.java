@@ -9,9 +9,6 @@ import com.github.houbb.heaven.util.util.SetUtil;
 import com.github.houbb.ioc.annotation.Primary;
 import com.github.houbb.ioc.core.ListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
-import com.github.houbb.ioc.model.BeanDefinition;
-import com.github.houbb.ioc.support.aware.service.AwareService;
-import com.github.houbb.ioc.support.aware.service.impl.DefaultAwareService;
 
 import java.util.List;
 import java.util.Set;

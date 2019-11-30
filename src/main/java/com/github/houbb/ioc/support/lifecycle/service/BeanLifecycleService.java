@@ -61,4 +61,12 @@ public interface BeanLifecycleService extends DisposableBean {
      */
     Object createBean(final BeanDefinition beanDefinition);
 
+    /**
+     * 注册单例对象
+     * @param beanDefinition 对象定义信息
+     * @param instance 对象实例
+     * @since 0.1.10
+     */
+    void registerSingletonBean(final BeanDefinition beanDefinition, final Object instance);
+
 }

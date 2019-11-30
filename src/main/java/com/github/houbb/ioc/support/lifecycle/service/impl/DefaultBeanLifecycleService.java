@@ -178,6 +178,26 @@ public class DefaultBeanLifecycleService implements BeanLifecycleService {
         return instance;
     }
 
+    @Override
+    public synchronized void registerSingletonBean(final BeanDefinition beanDefinition, Object instance) {
+        ArgUtil.notNull(beanDefinition, "beanDefinition");
+
+        final String beanName = beanDefinition.getName();
+        //1. 判断是否已经存在
+        if(beanMap.containsKey(beanName)) {
+            return;
+        }
+
+        //2. 不存在则进行设置放入
+        beanMap.put(beanName, instance);
+        //2.1 将初始化的信息加入列表中，便于后期销毁使用
+        Pair<Object, BeanDefinition> pair = Pair.of(instance, beanDefinition);
+        instanceBeanDefinitionList.add(pair);
+
+        //3. 通知监听者
+        this.notifyAllBeanCreateAware(beanName, instance);
+    }
+
     /**
      * 通知所有对象创建监听器
      *

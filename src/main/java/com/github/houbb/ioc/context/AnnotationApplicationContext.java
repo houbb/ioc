@@ -13,6 +13,7 @@ import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.annotation.*;
+import com.github.houbb.ioc.constant.ScopeConst;
 import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
@@ -90,6 +91,11 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
     }
 
     @Override
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    @Override
     protected <T> T getPrimaryBean(Class<T> requiredType) {
         String typeName = requiredType.getName();
         if(PRIMARY_TYPE_MAP.containsKey(typeName)) {
@@ -131,8 +137,6 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
 
         return resultList;
     }
-
-
 
     /**
      * 获取配置类列表信息

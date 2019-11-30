@@ -106,7 +106,7 @@ public class DefaultBeanDefinitionRegistry implements BeanDefinitionRegistry {
     /**
      * 获取类型集合
      * （1）当前类信息
-     * （2）所有的接口类信息
+     * （2）递归所有的父类和接口类信息
      *
      * @param beanDefinition 对象定义
      * @return 类型集合
@@ -119,10 +119,7 @@ public class DefaultBeanDefinitionRegistry implements BeanDefinitionRegistry {
         Class currentClass = ClassUtil.getClass(className);
         classSet.add(currentClass);
 
-        Class[] interfaces = currentClass.getInterfaces();
-        if (ArrayUtil.isNotEmpty(interfaces)) {
-            classSet.addAll(Arrays.asList(interfaces));
-        }
+        classSet.addAll(ClassUtil.getAllInterfacesAndSuperClass(currentClass));
         return classSet;
     }
 

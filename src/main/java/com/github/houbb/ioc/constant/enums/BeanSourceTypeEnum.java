@@ -23,7 +23,14 @@ public enum BeanSourceTypeEnum {
      * 配置注解 bean 类
      * @since 0.1.2
      */
-    CONFIGURATION_BEAN;
+    CONFIGURATION_BEAN,
+
+    /**
+     * 拓展支持类
+     * @since 0.1.9
+     */
+    SUPPORT
+    ;
 
     /**
      * 是否为配置对象

@@ -13,6 +13,7 @@ import com.github.houbb.ioc.test.service.Apple;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -103,6 +104,21 @@ public class AnnotationApplicationContextTest {
         BeanFactory testBeanFactory = new AnnotationApplicationContext(testEnv, AppBeanProfileConfig.class);
         Assert.assertFalse(testBeanFactory.containsBean("devBook"));
         Assert.assertTrue(testBeanFactory.containsBean("testBook"));
+    }
+
+    /**
+     * 自动装配环境测试
+     * @since 0.1.10
+     */
+    @Test
+    public void autowiredEnvTest() {
+        ConfigurableEnvironment devEnv = new DefaultEnvironment();
+        devEnv.setActiveProfiles(ProfileConst.DEV);
+
+        BeanFactory devBeanFactory = new AnnotationApplicationContext(devEnv, AppAutowiredEnvConfig.class);
+        AppAutowiredEnvConfig appAutowiredEnvConfig = devBeanFactory.getBean("appAutowiredEnvConfig",
+                AppAutowiredEnvConfig.class);
+        Assert.assertEquals("[dev]", Arrays.toString(appAutowiredEnvConfig.getProfiles()));
     }
 
 }

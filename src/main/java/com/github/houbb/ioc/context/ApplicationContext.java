@@ -2,6 +2,7 @@ package com.github.houbb.ioc.context;
 
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.ioc.core.ListableBeanFactory;
+import com.github.houbb.ioc.support.envrionment.EnvironmentCapable;
 
 /**
  * 应用上下文接口
@@ -11,7 +12,7 @@ import com.github.houbb.ioc.core.ListableBeanFactory;
  * @author Administrator
  * @since 0.0.4
  */
-public interface ApplicationContext extends ListableBeanFactory {
+public interface ApplicationContext extends ListableBeanFactory, EnvironmentCapable {
 
     /**
      * 获取应用名称

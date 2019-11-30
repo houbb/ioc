@@ -6,11 +6,17 @@ import com.github.houbb.heaven.util.lang.ObjectUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.util.CollectionUtil;
 import com.github.houbb.heaven.util.util.MapUtil;
+import com.github.houbb.ioc.constant.ScopeConst;
+import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
 import com.github.houbb.ioc.constant.enums.ScopeEnum;
 import com.github.houbb.ioc.core.impl.DefaultListableBeanFactory;
 import com.github.houbb.ioc.exception.IocRuntimeException;
+import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
+import com.github.houbb.ioc.model.impl.DefaultAnnotationBeanDefinition;
+import com.github.houbb.ioc.support.envrionment.Environment;
+import com.github.houbb.ioc.support.envrionment.impl.DefaultEnvironment;
 import com.github.houbb.ioc.support.processor.ApplicationContextPostProcessor;
 
 import java.util.List;
@@ -49,6 +55,12 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
      */
     private List<BeanDefinition> createAbleDefinitionList = Guavas.newArrayList();
 
+    /**
+     * 环境对象信息
+     * @since 0.1.10
+     */
+    private AnnotationBeanDefinition environmentBeanDefinition = buildEnvironmentBeanDefinition();
+
     @Override
     public String getApplicationName() {
         return "application context";
@@ -68,6 +80,8 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
     protected void init() {
         // 原始数据信息
         List<BeanDefinition> beanDefinitionList = buildBeanDefinitionList();
+        // 添加环境相关信息
+        beanDefinitionList.add(environmentBeanDefinition);
 
         // 这里对 bean 进行统一的处理
         this.buildCreateAbleBeanDefinitionList(beanDefinitionList);
@@ -88,6 +102,27 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
         awareService.notifyAllApplicationContextAware(this);
     }
 
+    @Override
+    public Environment getEnvironment() {
+        return DefaultEnvironment.defaultInstance();
+    }
+
+    /**
+     * 构建环境注解信息
+     * @return 环境注解信息
+     * @since 0.1.10
+     */
+    private AnnotationBeanDefinition buildEnvironmentBeanDefinition() {
+        final Class clazz = DefaultEnvironment.class;
+        AnnotationBeanDefinition beanDefinition = new DefaultAnnotationBeanDefinition();
+        beanDefinition.setName("environment");
+        beanDefinition.setClassName(clazz.getName());
+        beanDefinition.setLazyInit(false);
+        beanDefinition.setScope(ScopeConst.SINGLETON);
+        beanDefinition.setBeanSourceType(BeanSourceTypeEnum.SUPPORT);
+        return beanDefinition;
+    }
+
     /**
      * 注册对象属性列表
      * @param beanDefinitionList 对象属性列表
@@ -102,6 +137,9 @@ public abstract class AbstractApplicationContext extends DefaultListableBeanFact
 
                 super.registerBeanDefinition(beanDefinition.getName(), beanDefinition);
             }
+
+            // 注册环境实例
+            beanLifecycleService.registerSingletonBean(environmentBeanDefinition, getEnvironment());
 
             // 初始化 eager 单例对象 @since 0.1.5
             // 调整顺序，避免信息未加载完成
