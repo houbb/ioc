@@ -1,6 +1,7 @@
 package com.github.houbb.ioc.model.impl;
 
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
+import com.github.houbb.ioc.support.envrionment.PropertySource;
 
 import java.util.List;
 
@@ -92,4 +93,3 @@ public class DefaultAnnotationBeanDefinition extends DefaultBeanDefinition imple
     }
 
 }
-

@@ -2,11 +2,14 @@ package com.github.houbb.ioc.support.lifecycle.property.impl;
 
 import com.github.houbb.heaven.annotation.ThreadSafe;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
+import com.github.houbb.heaven.util.lang.reflect.ReflectFieldUtil;
 import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
 import com.github.houbb.ioc.support.converter.StringValueConverterFactory;
 import com.github.houbb.ioc.support.lifecycle.property.SingleBeanPropertyProcessor;
+
+import java.lang.reflect.Field;
 
 /**
  * 对象属性设置类。
@@ -35,10 +38,17 @@ class ValueBeanPropertyProcessor implements SingleBeanPropertyProcessor {
     public void propertyProcessor(BeanFactory beanFactory, Object instance, PropertyArgDefinition propertyArgDefinition) {
         String valueStr = propertyArgDefinition.getValue();
         String typeStr = propertyArgDefinition.getType();
+        boolean fieldBase = propertyArgDefinition.isFieldBase();
+        String fieldName = propertyArgDefinition.getName();
 
         Class type = ClassUtil.getClass(typeStr);
         Object value = StringValueConverterFactory.convertValue(valueStr, type);
-        ReflectMethodUtil.invokeSetterMethod(instance, propertyArgDefinition.getName(), value);
+
+        if(fieldBase) {
+            ReflectFieldUtil.setValue(instance, fieldName, value);
+        } else {
+            ReflectMethodUtil.invokeSetterMethod(instance, fieldName, value);
+        }
     }
 
 }

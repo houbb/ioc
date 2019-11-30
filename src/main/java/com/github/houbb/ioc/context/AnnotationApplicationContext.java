@@ -3,9 +3,11 @@ package com.github.houbb.ioc.context;
 import com.github.houbb.heaven.reflect.meta.annotation.IAnnotationTypeMeta;
 import com.github.houbb.heaven.reflect.meta.annotation.impl.ClassAnnotationTypeMeta;
 import com.github.houbb.heaven.reflect.meta.annotation.impl.MethodAnnotationTypeMeta;
+import com.github.houbb.heaven.support.handler.IHandler;
 import com.github.houbb.heaven.support.instance.impl.Instances;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
+import com.github.houbb.heaven.util.io.StreamUtil;
 import com.github.houbb.heaven.util.lang.StringUtil;
 import com.github.houbb.heaven.util.lang.reflect.ClassUtil;
 import com.github.houbb.heaven.util.lang.reflect.ReflectAnnotationUtil;
@@ -13,26 +15,35 @@ import com.github.houbb.heaven.util.lang.reflect.ReflectMethodUtil;
 import com.github.houbb.heaven.util.util.ArrayUtil;
 import com.github.houbb.heaven.util.util.Optional;
 import com.github.houbb.ioc.annotation.*;
-import com.github.houbb.ioc.constant.ScopeConst;
 import com.github.houbb.ioc.constant.enums.BeanSourceTypeEnum;
+import com.github.houbb.ioc.exception.IocRuntimeException;
 import com.github.houbb.ioc.model.AnnotationBeanDefinition;
 import com.github.houbb.ioc.model.BeanDefinition;
+import com.github.houbb.ioc.model.PropertyArgDefinition;
 import com.github.houbb.ioc.model.impl.DefaultAnnotationBeanDefinition;
+import com.github.houbb.ioc.model.impl.DefaultPropertyArgDefinition;
 import com.github.houbb.ioc.support.annotation.Lazys;
 import com.github.houbb.ioc.support.annotation.Scopes;
 import com.github.houbb.ioc.support.condition.Condition;
 import com.github.houbb.ioc.support.condition.impl.DefaultConditionContext;
+import com.github.houbb.ioc.support.envrionment.ConfigurableEnvironment;
 import com.github.houbb.ioc.support.envrionment.Environment;
+import com.github.houbb.ioc.support.envrionment.PropertyResolver;
+import com.github.houbb.ioc.support.envrionment.PropertySource;
 import com.github.houbb.ioc.support.envrionment.impl.DefaultEnvironment;
+import com.github.houbb.ioc.support.envrionment.impl.PropertiesPropertySource;
+import com.github.houbb.ioc.support.envrionment.impl.PropertySourcesPropertyResolver;
 import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * 注解应用上下文
@@ -65,9 +76,9 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
      * 环境信息
      * @since 0.1.9
      */
-    private final Environment environment;
+    private final ConfigurableEnvironment environment;
 
-    public AnnotationApplicationContext(Environment environment, Class... configClasses) {
+    public AnnotationApplicationContext(ConfigurableEnvironment environment, Class... configClasses) {
         ArgUtil.notEmpty(configClasses, "configClasses");
         ArgUtil.notNull(environment, "environment");
 
@@ -136,6 +147,91 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
         }
 
         return resultList;
+    }
+
+    /**
+     * 构建资源属性
+     * （1）这个应该每个对象独立，将这个属性放在 {@link Configuration} 标注的对象中。
+     * （2）结合 {@link com.github.houbb.ioc.support.envrionment.impl.PropertySourcesPropertyResolver} 处理
+     * {@link Value} 注解标注的信息。
+     * （3）类似于自动注入，处理相关的信息。
+     * 这个处理的实际应该比较靠前，在 {@link Configuration} 类初始化的之后，立刻进行值得处理。
+     *
+     * @param clazz 类信息
+     * @return 结果列表
+     * @since 0.1.10
+     */
+    private List<PropertySource> buildPropertySourceList(final Class clazz) {
+        List<PropertySource> resultList = Guavas.newArrayList();
+        if(!clazz.isAnnotationPresent(PropertiesResource.class)) {
+            return resultList;
+        }
+
+        PropertiesResource propertiesResource = (PropertiesResource) clazz.getAnnotation(PropertiesResource.class);
+        String[] strings = propertiesResource.value();
+
+        if(ArrayUtil.isEmpty(strings)) {
+            return resultList;
+        }
+
+        return ArrayUtil.toList(strings, new IHandler<String, PropertySource>() {
+            @Override
+            public PropertySource handle(String s) {
+                Properties properties = getProperties(s);
+                return new PropertiesPropertySource(s, properties);
+            }
+        });
+    }
+
+    /**
+     * 构建参数信息
+     * （1）根据 {@link #buildPropertySourceList(Class)} 设置结果
+     * （2）用于后期属性设置
+     * @param clazz 类
+     * @return 结果列表
+     * @since 0.1.10
+     */
+    private List<PropertyArgDefinition> buildConfigPropertyArgDefinitions(final Class clazz) {
+        List<PropertyArgDefinition> resultList = Guavas.newArrayList();
+
+        List<PropertySource> propertySourceList = buildPropertySourceList(clazz);
+        PropertyResolver propertyResolver = new PropertySourcesPropertyResolver(propertySourceList);
+
+        List<Field> fieldList = ClassUtil.getModifyableFieldList(clazz);
+        for(Field field : fieldList) {
+            if(field.isAnnotationPresent(Value.class)) {
+                Value value = field.getAnnotation(Value.class);
+                String expression = value.value();
+                String actualValue = propertyResolver.resolveRequiredPlaceholders(expression);
+
+                PropertyArgDefinition argDefinition = new DefaultPropertyArgDefinition();
+                argDefinition.setName(field.getName());
+                argDefinition.setFieldBase(true);
+                argDefinition.setType(field.getType().getName());
+                argDefinition.setValue(actualValue);
+
+                resultList.add(argDefinition);
+            }
+        }
+
+        return resultList;
+    }
+
+    /**
+     * 加载配置文件信息
+     * @param path 路径
+     * @return 结果
+     * @since 0.1.10
+     */
+    private Properties getProperties(final String path) {
+        try(InputStream inputStream = StreamUtil.getInputStream(path)){
+            Properties properties = new Properties();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            properties.load(inputStreamReader);
+            return properties;
+        } catch (IOException e) {
+            throw new IocRuntimeException("Load properties file fail of path: " + path);
+        }
     }
 
     /**
@@ -214,6 +310,10 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
         if(clazz.isAnnotationPresent(Primary.class)) {
             beanDefinition.setPrimary(true);
         }
+
+        // 设置属性配置信息
+        List<PropertyArgDefinition> propertyArgDefinitions = buildConfigPropertyArgDefinitions(clazz);
+        beanDefinition.setPropertyArgList(propertyArgDefinitions);
 
         return Optional.of(beanDefinition);
     }

@@ -34,6 +34,12 @@ public class DefaultPropertyArgDefinition implements PropertyArgDefinition {
      */
     private String ref;
 
+    /**
+     * 是否基于字段
+     * @since 0.1.10
+     */
+    private boolean fieldBase;
+
     @Override
     public String getName() {
         return name;
@@ -75,12 +81,23 @@ public class DefaultPropertyArgDefinition implements PropertyArgDefinition {
     }
 
     @Override
+    public boolean isFieldBase() {
+        return fieldBase;
+    }
+
+    @Override
+    public void setFieldBase(boolean fieldBase) {
+        this.fieldBase = fieldBase;
+    }
+
+    @Override
     public String toString() {
         return "DefaultPropertyArgDefinition{" +
                 "name='" + name + '\'' +
                 ", type='" + type + '\'' +
                 ", value='" + value + '\'' +
                 ", ref='" + ref + '\'' +
+                ", fieldBase=" + fieldBase +
                 '}';
     }
 

@@ -64,4 +64,18 @@ public interface PropertyArgDefinition {
      */
     void setRef(final String ref);
 
+    /**
+     * 是否基于字段
+     * @return 基于字段
+     * @since 0.1.10
+     */
+    boolean isFieldBase();
+
+    /**
+     * 设置是否基于字段
+     * @param fieldBase 基于字段
+     * @since 0.1.10
+     */
+    void setFieldBase(final boolean fieldBase);
+
 }
