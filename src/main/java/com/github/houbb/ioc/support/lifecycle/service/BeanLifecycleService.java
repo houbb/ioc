@@ -36,7 +36,7 @@ public interface BeanLifecycleService extends DisposableBean {
 
     /**
      * 注册单例且渴望初期初始化的对象
-     * （1）如果是 singleton & lazy-init=false 则进行初始化处理
+     * （1）如果是 singleton 且 lazy-init=false 则进行初始化处理
      * （2）创建完成后，对象放入 beanMap 中，便于后期使用
      *
      * @param beanName       bean 名称
