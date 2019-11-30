@@ -1,8 +1,12 @@
 package com.github.houbb.ioc.test.context;
 
+import com.github.houbb.ioc.constant.ProfileConst;
 import com.github.houbb.ioc.context.AnnotationApplicationContext;
 import com.github.houbb.ioc.context.JsonApplicationContext;
 import com.github.houbb.ioc.core.BeanFactory;
+import com.github.houbb.ioc.support.envrionment.ConfigurableEnvironment;
+import com.github.houbb.ioc.support.envrionment.Environment;
+import com.github.houbb.ioc.support.envrionment.impl.DefaultEnvironment;
 import com.github.houbb.ioc.test.config.*;
 import com.github.houbb.ioc.test.model.Book;
 import com.github.houbb.ioc.test.service.Apple;
@@ -80,6 +84,25 @@ public class AnnotationApplicationContextTest {
 
         Assert.assertFalse(beanFactory.containsBean("book"));
         Assert.assertTrue(beanFactory.containsBean("book2"));
+    }
+
+    /**
+     * 环境测试
+     * @since 0.1.9
+     */
+    @Test
+    public void profileTest() {
+        ConfigurableEnvironment devEnv = new DefaultEnvironment();
+        devEnv.setActiveProfiles(ProfileConst.DEV);
+        BeanFactory devBeanFactory = new AnnotationApplicationContext(devEnv, AppBeanProfileConfig.class);
+        Assert.assertTrue(devBeanFactory.containsBean("devBook"));
+        Assert.assertFalse(devBeanFactory.containsBean("testBook"));
+
+        ConfigurableEnvironment testEnv = new DefaultEnvironment();
+        testEnv.setActiveProfiles(ProfileConst.TEST);
+        BeanFactory testBeanFactory = new AnnotationApplicationContext(testEnv, AppBeanProfileConfig.class);
+        Assert.assertFalse(testBeanFactory.containsBean("devBook"));
+        Assert.assertTrue(testBeanFactory.containsBean("testBook"));
     }
 
 }

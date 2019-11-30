@@ -3,6 +3,7 @@ package com.github.houbb.ioc.support.condition.impl;
 import com.github.houbb.heaven.reflect.meta.annotation.IAnnotationTypeMeta;
 import com.github.houbb.ioc.core.BeanFactory;
 import com.github.houbb.ioc.support.condition.ConditionContext;
+import com.github.houbb.ioc.support.envrionment.Environment;
 import com.github.houbb.ioc.support.lifecycle.registry.BeanDefinitionRegistry;
 
 /**
@@ -30,6 +31,12 @@ public class DefaultConditionContext implements ConditionContext {
      */
     private IAnnotationTypeMeta annotationTypeMeta;
 
+    /**
+     * 环境信息
+     * @since 0.1.9
+     */
+    private Environment environment;
+
     @Override
     public BeanFactory getBeanFactory() {
         return beanFactory;
@@ -56,4 +63,14 @@ public class DefaultConditionContext implements ConditionContext {
     public void setAnnotationTypeMeta(IAnnotationTypeMeta annotationTypeMeta) {
         this.annotationTypeMeta = annotationTypeMeta;
     }
+
+    @Override
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
+
 }

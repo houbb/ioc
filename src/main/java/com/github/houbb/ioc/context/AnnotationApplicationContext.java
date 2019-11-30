@@ -4,7 +4,6 @@ import com.github.houbb.heaven.reflect.meta.annotation.IAnnotationTypeMeta;
 import com.github.houbb.heaven.reflect.meta.annotation.impl.ClassAnnotationTypeMeta;
 import com.github.houbb.heaven.reflect.meta.annotation.impl.MethodAnnotationTypeMeta;
 import com.github.houbb.heaven.support.instance.impl.Instances;
-import com.github.houbb.heaven.support.tuple.impl.Pair;
 import com.github.houbb.heaven.util.common.ArgUtil;
 import com.github.houbb.heaven.util.guava.Guavas;
 import com.github.houbb.heaven.util.lang.StringUtil;
@@ -22,6 +21,8 @@ import com.github.houbb.ioc.support.annotation.Lazys;
 import com.github.houbb.ioc.support.annotation.Scopes;
 import com.github.houbb.ioc.support.condition.Condition;
 import com.github.houbb.ioc.support.condition.impl.DefaultConditionContext;
+import com.github.houbb.ioc.support.envrionment.Environment;
+import com.github.houbb.ioc.support.envrionment.impl.DefaultEnvironment;
 import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
 
@@ -57,13 +58,26 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
      * 主要类型映射 map
      * @since 0.1.7
      */
-    private Map<String, String> PRIMARY_TYPE_MAP = Guavas.newHashMap();
+    private static final Map<String, String> PRIMARY_TYPE_MAP = Guavas.newHashMap();
 
-    public AnnotationApplicationContext(Class... configClasses) {
+    /**
+     * 环境信息
+     * @since 0.1.9
+     */
+    private final Environment environment;
+
+    public AnnotationApplicationContext(Environment environment, Class... configClasses) {
         ArgUtil.notEmpty(configClasses, "configClasses");
+        ArgUtil.notNull(environment, "environment");
+
+        this.environment = environment;
         this.configClasses = configClasses;
 
         super.init();
+    }
+
+    public AnnotationApplicationContext(Class... configClasses) {
+        this(DefaultEnvironment.defaultInstance(), configClasses);
     }
 
     /**
@@ -234,6 +248,7 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
         conditionContext.setBeanFactory(this);
         conditionContext.setBeanDefinitionRegistry(beanDefinitionRegistry);
         conditionContext.setAnnotationTypeMeta(typeMeta);
+        conditionContext.setEnvironment(this.environment);
 
         for(Map.Entry<Class<? extends Condition>, Map<String, Object>> entry : map.entrySet()) {
             Condition condition = ClassUtil.newInstance(entry.getKey());
