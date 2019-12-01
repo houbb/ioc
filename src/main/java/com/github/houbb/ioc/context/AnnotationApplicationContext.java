@@ -35,6 +35,11 @@ import com.github.houbb.ioc.support.envrionment.impl.PropertiesPropertySource;
 import com.github.houbb.ioc.support.envrionment.impl.PropertySourcesPropertyResolver;
 import com.github.houbb.ioc.support.name.BeanNameStrategy;
 import com.github.houbb.ioc.support.name.impl.DefaultBeanNameStrategy;
+import com.github.houbb.ioc.support.scanner.AnnotationBeanDefinitionScanner;
+import com.github.houbb.ioc.support.scanner.BeanDefinitionScannerContext;
+import com.github.houbb.ioc.support.scanner.impl.ClassPathAnnotationBeanDefinitionScanner;
+import com.github.houbb.ioc.support.scanner.impl.DefaultBeanDefinitionScannerContext;
+import com.sun.org.apache.bcel.internal.util.ClassPath;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -124,29 +129,70 @@ public class AnnotationApplicationContext extends AbstractApplicationContext {
      */
     @Override
     protected List<BeanDefinition> buildBeanDefinitionList() {
-        List<BeanDefinition> resultList = Guavas.newArrayList();
+        Set<BeanDefinition> beanDefinitionSet = Guavas.newHashSet();
 
         final List<Class> configList = getConfigClassList();
+
         for(Class clazz : configList) {
             Optional<AnnotationBeanDefinition> configurationOpt = buildConfigurationBeanDefinition(clazz);
             if(configurationOpt.isPresent()) {
                 BeanDefinition configuration = configurationOpt.get();
-                resultList.add(configuration);
+                beanDefinitionSet.add(configuration);
 
+                // 配置类定义对象
                 List<AnnotationBeanDefinition> beanDefinitions = buildBeanAnnotationList(configuration, clazz);
-                resultList.addAll(beanDefinitions);
+                beanDefinitionSet.addAll(beanDefinitions);
+
+                // 扫描对象
+                Set<AnnotationBeanDefinition> scanBeanDefinitions = buildScanBeanDefinitionSet(clazz);
+                beanDefinitionSet.addAll(scanBeanDefinitions);
             }
         }
 
         // 注册 primary 对应的对象信息
-        for(BeanDefinition beanDefinition : resultList) {
+        for(BeanDefinition beanDefinition : beanDefinitionSet) {
             AnnotationBeanDefinition annotationBeanDefinition = (AnnotationBeanDefinition)beanDefinition;
             if(annotationBeanDefinition.isPrimary()) {
                 PRIMARY_TYPE_MAP.put(annotationBeanDefinition.getClassName(), annotationBeanDefinition.getName());
             }
         }
 
-        return resultList;
+        // 转换为列表
+        return Guavas.newArrayList(beanDefinitionSet);
+    }
+
+    /**
+     * 构建扫描对象集合
+     * @param clazz 类
+     * @return 集合
+     * @since 0.1.11
+     */
+    private Set<AnnotationBeanDefinition> buildScanBeanDefinitionSet(final Class clazz) {
+        Set<AnnotationBeanDefinition> beanDefinitionSet =  Guavas.newHashSet();
+        if(!clazz.isAnnotationPresent(ComponentScan.class)) {
+            return beanDefinitionSet;
+        }
+
+        ComponentScan componentScan = (ComponentScan) clazz.getAnnotation(ComponentScan.class);
+
+        final AnnotationBeanDefinitionScanner beanDefinitionScanner = Instances.singleton(ClassPathAnnotationBeanDefinitionScanner.class);
+        DefaultBeanDefinitionScannerContext context = new DefaultBeanDefinitionScannerContext();
+        context.setScanPackages(ArrayUtil.toList(componentScan.value()));
+        context.setBeanNameStrategy(componentScan.beanNameStrategy());
+        context.setExcludes(ArrayUtil.toList(componentScan.excludes(), new IHandler<Class<? extends Annotation>, Class>() {
+            @Override
+            public Class handle(Class<? extends Annotation> aClass) {
+                return aClass;
+            }
+        }));
+        context.setIncludes(ArrayUtil.toList(componentScan.includes(), new IHandler<Class<? extends Annotation>, Class>() {
+            @Override
+            public Class handle(Class<? extends Annotation> aClass) {
+                return aClass;
+            }
+        }));
+
+        return beanDefinitionScanner.scan(context);
     }
 
     /**

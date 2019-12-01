@@ -29,7 +29,13 @@ public enum BeanSourceTypeEnum {
      * 拓展支持类
      * @since 0.1.9
      */
-    SUPPORT
+    SUPPORT,
+
+    /**
+     * 组件信息
+     * @since 0.1.11
+     */
+    COMPONENT
     ;
 
     /**

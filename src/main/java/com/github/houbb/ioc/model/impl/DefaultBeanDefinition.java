@@ -6,6 +6,7 @@ import com.github.houbb.ioc.model.ConstructorArgDefinition;
 import com.github.houbb.ioc.model.PropertyArgDefinition;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 默认对象定义属性
@@ -215,6 +216,24 @@ public class DefaultBeanDefinition implements BeanDefinition {
     @Override
     public void setBeanSourceType(BeanSourceTypeEnum beanSourceType) {
         this.beanSourceType = beanSourceType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DefaultBeanDefinition that = (DefaultBeanDefinition) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(className, that.className);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, className);
     }
 }
 

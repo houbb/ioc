@@ -119,6 +119,8 @@ Apple color: red.
 
 [v0.1.10-Property 配置文件相关和 @Value/@PropertyResource 实现](https://github.com/houbb/ioc/tree/release_0.1.10)
 
+[v0.1.11-@ComponentScan 文件包扫描支持](https://github.com/houbb/ioc/tree/release_0.1.11)
+
 # 拓展阅读
 
 [Java IOC-00-ioc 是什么](https://houbb.github.io/2019/11/06/java-ioc-01-overview)

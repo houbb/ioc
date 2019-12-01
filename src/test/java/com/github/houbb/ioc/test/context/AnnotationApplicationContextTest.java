@@ -10,6 +10,7 @@ import com.github.houbb.ioc.support.envrionment.impl.DefaultEnvironment;
 import com.github.houbb.ioc.test.config.*;
 import com.github.houbb.ioc.test.model.Book;
 import com.github.houbb.ioc.test.service.Apple;
+import com.github.houbb.ioc.test.service.inner.QueryService;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -147,6 +148,30 @@ public class AnnotationApplicationContextTest {
                 .getBean("appPropertyResourceValueConfig", AppPropertyResourceValueConfig.class);
 
         Assert.assertEquals("hello", appPropertyResourceValueConfig.getName());
+    }
+
+    /**
+     * 组件扫描针对文件的实现
+     * @since 0.1.11
+     */
+    @Test
+    public void componentScanFilesTest() {
+        BeanFactory beanFactory = new AnnotationApplicationContext(AppComponentScanConfig.class);
+        QueryService queryService = beanFactory.getBean("myQueryService", QueryService.class);
+
+        Assert.assertEquals("1-name", queryService.queryName(1));
+    }
+
+    /**
+     * 组件扫描针对文件的实现-包含过滤
+     * @since 0.1.11
+     */
+    @Test
+    public void componentScanFilesFilterTest() {
+        BeanFactory beanFactory = new AnnotationApplicationContext(AppComponentScanFilterConfig.class);
+
+        Assert.assertTrue(beanFactory.containsBean("queryServiceManager"));
+        Assert.assertFalse(beanFactory.containsBean("myQueryService"));
     }
 
 }

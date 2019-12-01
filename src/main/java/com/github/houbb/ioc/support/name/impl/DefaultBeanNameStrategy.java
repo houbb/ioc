@@ -26,6 +26,7 @@ public class DefaultBeanNameStrategy implements BeanNameStrategy {
      * @return 生成的结果名称
      * @since 0.1.1
      */
+    @Override
     public String generateBeanName(BeanDefinition definition) {
         final String name = definition.getName();
         if(StringUtil.isNotEmpty(name)) {
