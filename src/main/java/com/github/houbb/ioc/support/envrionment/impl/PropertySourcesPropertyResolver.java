@@ -29,7 +29,7 @@ public class PropertySourcesPropertyResolver implements ConfigurablePropertyReso
      * 后缀
      * @since 0.1.10
      */
-    private String placeholderSuffix = "{";
+    private String placeholderSuffix = "}";
 
     /**
      * 分隔符
@@ -118,14 +118,10 @@ public class PropertySourcesPropertyResolver implements ConfigurablePropertyReso
 
             String[] strings = placeholder.split(valueSeparator);
             String key = strings[0];
-            // 断言必须存在
-            if(required && !containsProperty(key)) {
-                throw new IocRuntimeException("Can't resolve property for key " + key);
-            }
 
             if(strings.length == 1) {
-                // 默认为其本身
-                return getProperty(key, text);
+                // 断言必须存在
+                return getRequiredProperty(key);
             }
 
             // 第一个为键，第二个为默认值

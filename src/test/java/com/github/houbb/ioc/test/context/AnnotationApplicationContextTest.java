@@ -121,4 +121,32 @@ public class AnnotationApplicationContextTest {
         Assert.assertEquals("[dev]", Arrays.toString(appAutowiredEnvConfig.getProfiles()));
     }
 
+    /**
+     * {@link com.github.houbb.ioc.annotation.Value} 测试
+     * @since 0.1.10
+     */
+    @Test
+    public void propertyValueTest() {
+        BeanFactory devBeanFactory = new AnnotationApplicationContext(AppPropertyValueConfig.class);
+        AppPropertyValueConfig appPropertyValueConfig = devBeanFactory.getBean("appPropertyValueConfig",
+                AppPropertyValueConfig.class);
+
+        Assert.assertEquals("ryo", appPropertyValueConfig.getName());
+    }
+
+    /**
+     * {@link com.github.houbb.ioc.annotation.Value} 测试
+     * {@link com.github.houbb.ioc.annotation.PropertiesResource} 资源信息
+     *
+     * @since 0.1.10
+     */
+    @Test
+    public void propertyResourceValueTest() {
+        BeanFactory devBeanFactory = new AnnotationApplicationContext(AppPropertyResourceValueConfig.class);
+        AppPropertyResourceValueConfig appPropertyResourceValueConfig = devBeanFactory
+                .getBean("appPropertyResourceValueConfig", AppPropertyResourceValueConfig.class);
+
+        Assert.assertEquals("hello", appPropertyResourceValueConfig.getName());
+    }
+
 }

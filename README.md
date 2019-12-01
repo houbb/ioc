@@ -115,6 +115,10 @@ Apple color: red.
 
 [v0.1.8-@Conditional 条件注解支持](https://github.com/houbb/ioc/tree/release_0.1.8)
 
+[v0.1.9-Environment 和 @Profile 实现](https://github.com/houbb/ioc/tree/release_0.1.9)
+
+[v0.1.10-Property 配置文件相关和 @Value/@PropertyResource 实现](https://github.com/houbb/ioc/tree/release_0.1.10)
+
 # 拓展阅读
 
 [Java IOC-00-ioc 是什么](https://houbb.github.io/2019/11/06/java-ioc-01-overview)
