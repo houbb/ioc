@@ -406,13 +406,6 @@ public class JsonApplicationContext extends DefaultBeanFactory {
 [Java IOC-00-ioc 是什么](https://houbb.github.io/2019/11/06/java-ioc-01-overview)
 
 
-
-select sum(renting_total_num) from xiaoqu_summary_info;
-
-
-select count(*) from house_rent_info;
-
-
 # 中间件等工具开源矩阵
 
 [heaven: 收集开发中常用的工具类](https://github.com/houbb/heaven)
